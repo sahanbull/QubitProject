@@ -3,6 +3,7 @@
 
 import csv
 import glob
+import re
 
 import qbGlobals as qbGbl
 
@@ -56,6 +57,20 @@ def writeFilCSV(file,filData):
 	for row in filData:
 		realFile.writerow(row); # write to file
 
+## this function writes useable files with x and y only
+def writeUsableCSV(file,filData):
+
+	# opens the csv file or creates one if its not there
+	csvfile = open(file, 'wb');
+
+	# sets properties and attributes
+	realFile = csv.writer(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC);
+
+	# foreach row in the filtered dataset
+	for row in filData:
+		realFile.writerow(row); # write to file
+
+
 ## this function conversts the string of classification to useable list
 def convClasses(field,split):
 	temp = field.split(split);
@@ -103,3 +118,42 @@ def importFilCSV(file):
 		filData.append(row);
 	
 	return filData
+
+## this function tokenizes a string and returns the list of strings
+def tokenStr(str):
+	return str.split();
+
+## this function simplifies the text : 
+#		removes all non-alpha chars
+def simplify(str):
+	str = re.sub(r'[^\w\s]','',str);
+	return str
+
+## this function converts all the letters to lower class 
+def toLower(str):
+	return str.lower();
+
+## this function standardizes the text field
+def standadiseString(str,type):
+	if type[1]==1:
+		pass
+	if type[2]==1:
+		pass
+	if type[0]=='1':	 
+		str = simplify(str);
+
+	str = toLower(str);	
+
+	return str;
+
+## this function prepares the data in the format specified by type
+def prepareData(filData,type):
+	tempfilData = [];
+	for row in filData:
+		# print '==='
+		str = row[2];
+		#str = tokenStr(str);
+		str = standadiseString(str,type);
+		tempfilData.append([row[0],str,row[3]]);
+	
+	return tempfilData
