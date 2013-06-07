@@ -38,12 +38,25 @@ def doReliabilityScoring():
 
 	return scoreCard
 
+## this funciton tokenizes the words
+def prepareData(type):
+	# load the filtered dataset
+	filData = qbPre.importFilCSV(qbGbl.filFileName);
+
+	filData = qbPre.prepareData(filData,type);
+
+	# write filtered data to a different file in the HDD 
+	qbPre.writeFilCSV(qbGbl.dataSet100,filData);
+
 
 ########################## Main Script ########################
 
 ## filter the data from the main dataset and write the only relevant files to new file
-#filterData()
+#filterData()	
 
 ## carry out reliabilty scoring and then write results to a CSV file
-scoreCard = doReliabilityScoring();
-qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
+# scoreCard = doReliabilityScoring();
+# qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
+
+## start tokenizing the stuff
+prepareData('100');
