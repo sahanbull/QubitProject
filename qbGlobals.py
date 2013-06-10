@@ -1,25 +1,29 @@
 
 ################### global variables #######################
 
-global OriFileName;
-OriFileName = 'data\\read';
+oriFileName = 'data\\read';
 
-global filFileName;
 filFileName = 'data\\write\\fil_comb_results.csv';
 
 # record simple only dataset
-global filFileName;
-dataSet100 = 'data\\write\\dataSet_100.csv'
+dataSetFileName = 'data\\write\\dataSet'
 
 # where to record worker scorecards
-global filFileName;
 scoreFileName = 'data\\write\\worker_scorecard.csv'
 
 # to store required attributes
 att = 'data\\attributes';
 
 # keeps the class references <class ref: ref index>
-global classDict;
 classDict = {};
+
+clsDictFileName = '{0}\\classDict.csv'.format(att);
+
+
+wordRefDict = {};
+
+wordRefDictFileName = '{0}\\wordRefDict'.format(att);
+
+
 
 # preprocess the data 
