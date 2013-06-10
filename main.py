@@ -52,6 +52,7 @@ def prepareData(type):
 def preProcessData(type):
 	# load the cleaned dataset
 	filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
+	print qbGbl.wordIDFDict
 
 
 ########################## Main Script ########################
