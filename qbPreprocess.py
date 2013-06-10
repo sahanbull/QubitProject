@@ -1,6 +1,7 @@
 
 ####################### import pacakages #####################
 
+import math
 import csv
 import glob
 import re
@@ -101,17 +102,26 @@ def readClassDict(file):
 
 ## takes the list of tokens and updates the dictionary
 def updateWordRefDict(field,index):
+	tempIndex = []; # to store indices intiated via this field
+	wordSet = set(field); # make a unique set of words
 	for word in field:
 		if word not in qbGbl.wordRefDict:
-			qbGbl.wordRefDict[word] = index;
-			index+=1; 
+			qbGbl.wordRefDict[word] = index; # initiate word
+			qbGbl.wordIDFDict[index] = 0.0; # initiate IDF for the word
+			tempIndex.append(index); # to keep track of new keys for IDF count
+			index+=1;  
+		else:
+			tempIndex.append(qbGbl.wordRefDict[word]); # to count existing keys
+
+	# update IDF counts
+	for word in tempIndex:
+		qbGbl.wordIDFDict[word] += 1.0;
+
 	return index
 
 ## this function writes the dictionary of ref words to the specified file
 def saveWordRefDict(file):
 	wordRefDict = qbGbl.wordRefDict;
-
-	# print file
 
 	# opens the csv file or creates one if its not there
 	csvfile = open(file, 'wb');
@@ -135,16 +145,24 @@ def readFile(file,type):
 	# reads the csv content
 	realFile = csv.reader(csvFile, delimiter=',');
 
-	index = 1;
+	index = 0;
 	for row in realFile:
 		tempRow = tokenStr(row[1]);
 	 	index = updateWordRefDict(tempRow,index);
 	 	row[1] = tempRow;
 		filData.append(row);
 
+	numOfDocs = len(filData);
+	
+	# compute IDF for each word
+
+	for word in qbGbl.wordIDFDict:
+		tempDf = qbGbl.wordIDFDict[word];
+		qbGbl.wordIDFDict[word] = math.log(numOfDocs/tempDf);
+
 	# save the file in the dictionary in the HDD for later reference
 	saveWordRefDict('{0}_{1}.csv'.format(qbGbl.wordRefDictFileName,type));
-
+	
 	return filData
 	
 ## this function conversts the string of classification to useable list
