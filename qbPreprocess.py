@@ -4,6 +4,7 @@
 import csv
 import glob
 import re
+import nltk.tokenize as nltkTok
 
 import qbGlobals as qbGbl
 
@@ -70,7 +71,82 @@ def writeUsableCSV(file,filData):
 	for row in filData:
 		realFile.writerow(row); # write to file
 
+############################## build the dictionaries and manage them ######################
 
+## this function generates the dictionary of classes and their indexes
+def genClassDict(field,index):
+	for tmpCls in field:
+		if tmpCls not in qbGbl.classDict:
+			qbGbl.classDict[tmpCls] = index;
+			index+=1; 
+	return index
+
+## this function writes the dictionary to the specified file
+def saveClassDict(file):
+	classDict = qbGbl.classDict;
+
+	# opens the csv file or creates one if its not there
+	csvfile = open(file, 'wb');
+
+	# # sets properties and attributes
+	realFile = csv.writer(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC);
+
+	# # foreach row in the filtered dataset
+	for row in classDict:
+		realFile.writerow([row, classDict[row]]); # write to file
+
+## this function reads the classes dictionary from the the file:  HAVE TO BE UPDATED>>>>>>>>>>>>>>>>>>>>>>>>>>
+def readClassDict(file):
+	print file
+
+## takes the list of tokens and updates the dictionary
+def updateWordRefDict(field,index):
+	for word in field:
+		if word not in qbGbl.wordRefDict:
+			qbGbl.wordRefDict[word] = index;
+			index+=1; 
+	return index
+
+## this function writes the dictionary of ref words to the specified file
+def saveWordRefDict(file):
+	wordRefDict = qbGbl.wordRefDict;
+
+	# print file
+
+	# opens the csv file or creates one if its not there
+	csvfile = open(file, 'wb');
+
+	# # sets properties and attributes
+	realFile = csv.writer(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC);
+
+	# # foreach row in the filtered dataset
+	for row in wordRefDict:
+		realFile.writerow([row, wordRefDict[row]]); # write to file
+
+##########################################################################################
+
+## this function reads the preprocessed file
+def readFile(file,type):
+	filData = []; # stores the filtered dataset with only the relevant fields
+
+	# opens the csv file
+	csvFile = open(file,'rb');
+
+	# reads the csv content
+	realFile = csv.reader(csvFile, delimiter=',');
+
+	index = 1;
+	for row in realFile:
+		tempRow = tokenStr(row[1]);
+	 	index = updateWordRefDict(tempRow,index);
+	 	row[1] = tempRow;
+		filData.append(row);
+
+	# save the file in the dictionary in the HDD for later reference
+	saveWordRefDict('{0}_{1}.csv'.format(qbGbl.wordRefDictFileName,type));
+
+	return filData
+	
 ## this function conversts the string of classification to useable list
 def convClasses(field,split):
 	temp = field.split(split);
@@ -83,14 +159,6 @@ def conv2ClsDict(field):
 		newField.append(qbGbl.classDict[tmpCls]);
 
 	return newField
-
-## this function generates the dictionary of classes and their indexes
-def genClassDict(field,index):
-	for tmpCls in field:
-		if tmpCls not in qbGbl.classDict:
-			qbGbl.classDict[tmpCls] = index;
-			index+=1; 
-	return index
 
 ## this funciton imports the specified data set given in the string
 def importFilCSV(file):
@@ -116,12 +184,16 @@ def importFilCSV(file):
 		# 2: feedback content
 		# 3: classified classes
 		filData.append(row);
+
+	saveClassDict(qbGbl.clsDictFileName)
 	
 	return filData
 
 ## this function tokenizes a string and returns the list of strings
 def tokenStr(str):
-	return str.split();
+	return nltkTok.word_tokenize(str);
+
+	# return str.split();
 
 ## this function simplifies the text : 
 #		removes all non-alpha chars
