@@ -25,5 +25,10 @@ wordRefDict = {};
 wordRefDictFileName = '{0}\\wordRefDict'.format(att);
 
 
+wordIDFDict = {};
+
+wordIDFDictFileName = '{0}\\wordIDFDict'.format(att);
+
+
 
 # preprocess the data 
