@@ -13,7 +13,7 @@ def filterData():
 
 	# read original file and load the relevant data
 	# list all the csv log files with records
-	paths = qbPre.listFiles(qbGbl.OriFileName);
+	paths = qbPre.listFiles(qbGbl.oriFileName);
 
 	# foreach csv file in the paths
 	for path in paths:
@@ -46,7 +46,12 @@ def prepareData(type):
 	filData = qbPre.prepareData(filData,type);
 
 	# write filtered data to a different file in the HDD 
-	qbPre.writeFilCSV(qbGbl.dataSet100,filData);
+	qbPre.writeFilCSV('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),filData);
+
+## this function reads preProcessed Data and vectorise it
+def preProcessData(type):
+	# load the cleaned dataset
+	filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
 
 
 ########################## Main Script ########################
@@ -59,4 +64,7 @@ def prepareData(type):
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
 ## start tokenizing the stuff
-prepareData('100');
+type = '100';
+#prepareData(type);
+
+preProcessData(type);
