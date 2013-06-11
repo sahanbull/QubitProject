@@ -103,7 +103,6 @@ def readClassDict(file):
 ## takes the list of tokens and updates the dictionary
 def updateWordRefDict(field,index):
 	tempIndex = []; # to store indices intiated via this field
-	wordSet = set(field); # make a unique set of words
 	for word in field:
 		if word not in qbGbl.wordRefDict:
 			qbGbl.wordRefDict[word] = index; # initiate word
@@ -113,11 +112,12 @@ def updateWordRefDict(field,index):
 		else:
 			tempIndex.append(qbGbl.wordRefDict[word]); # to count existing keys
 
+	wordSet = set(tempIndex); # make a unique set of words		
 	# update IDF counts
-	for word in tempIndex:
+	for word in wordSet:
 		qbGbl.wordIDFDict[word] += 1.0;
 
-	return index
+	return [tempIndex,index]
 
 ## this function writes the dictionary of ref words to the specified file
 def saveWordRefDict(file):
@@ -133,7 +133,27 @@ def saveWordRefDict(file):
 	for row in wordRefDict:
 		realFile.writerow([row, wordRefDict[row]]); # write to file
 
+
+## this function writes the dictionary of ref words to the specified file
+def saveWordIDFDict(file):
+	wordIDFDict = qbGbl.wordIDFDict;
+
+	# opens the csv file or creates one if its not there
+	csvfile = open(file, 'wb');
+
+	# # sets properties and attributes
+	realFile = csv.writer(csvfile, delimiter=',',quoting=csv.QUOTE_NONNUMERIC);
+
+	# # foreach row in the filtered dataset
+	for row in wordIDFDict:
+		realFile.writerow([row, wordIDFDict[row]]); # write to file
+
 ##########################################################################################
+
+## This fucntion transforms the words into a list of indices
+def convertFeedback(row):
+	tempIndex = [];
+	pass
 
 ## this function reads the preprocessed file
 def readFile(file,type):
@@ -148,8 +168,11 @@ def readFile(file,type):
 	index = 0;
 	for row in realFile:
 		tempRow = tokenStr(row[1]);
-	 	index = updateWordRefDict(tempRow,index);
-	 	row[1] = tempRow;
+	 	bundle = updateWordRefDict(tempRow,index);
+
+	 	row[1] = bundle[0];
+	 	index = bundle[1];
+
 		filData.append(row);
 
 	numOfDocs = len(filData);
@@ -163,6 +186,9 @@ def readFile(file,type):
 	# save the file in the dictionary in the HDD for later reference
 	saveWordRefDict('{0}_{1}.csv'.format(qbGbl.wordRefDictFileName,type));
 	
+	# save the file in the dictionary in the HDD for later reference
+	saveWordIDFDict('{0}_{1}.csv'.format(qbGbl.wordIDFDictFileName,type));
+
 	return filData
 	
 ## this function conversts the string of classification to useable list
