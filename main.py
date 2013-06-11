@@ -60,21 +60,20 @@ def preProcessData(type):
 	return [filData,X] 
 
 
-
 ########################## Main Script ########################
 
 ## filter the data from the main dataset and write the only relevant files to new file
 #filterData()	
 
 ## carry out reliabilty scoring and then write results to a CSV file
-# scoreCard = doReliabilityScoring();
-# qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
+scoreCard = doReliabilityScoring();
+qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
 ## start tokenizing the stuff
-type = '100';
+# type = '100';
 #prepareData(type);
 
-pack = preProcessData(type);
+# pack = preProcessData(type);
 
-initData = pack[0];
-dataX = pack[1];
+# initData = pack[0];
+# dataX = pack[1];
