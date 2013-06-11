@@ -34,7 +34,11 @@ def genWorkDict(filData):
 def scoreWorkers(obsDict,workDict,filData):
 
 	# to store the number of worker occurences in the dataset for normalization
-	workCount = [];
+	workCount = []; 
+	maxCount = []; # to store number of time worker hits maximum points
+	minCount = []; # to count number of time worker hits minimum points
+	workStats = [];
+	#workStats = ["worker_id","no_of_jobs","score","max_score_ratio","min_score_ratio"];
 
 	# foreach feedback in list
 	for uObs in obsDict:
@@ -46,7 +50,6 @@ def scoreWorkers(obsDict,workDict,filData):
 			colClass.extend(filData[int(obs)-1][3]);
 		# count the class frequency among different workers for the feedback
 		uniClass = dict(Counter(colClass));
-
 		
 		# create word scorecard  >>  
 
@@ -55,28 +58,68 @@ def scoreWorkers(obsDict,workDict,filData):
 			# normalize for number of workers
 			uniClass[obs] = float(uniClass[obs])/float(len(obsDict[uObs]));
 		
-		## start scoring for workers by observation	>>
+		print uniClass
+		maxVal = uniClass[max(uniClass, key = uniClass.get)];
+		print maxVal
+		minVal = uniClass[min(uniClass, key = uniClass.get)];
+		print minVal
+		
 
+		## start scoring for workers by observation	>>
+		tempMaxCount = [];
+		tempMinCount = [];
 		# foreach obseravation with same feedback, different workers
 		for obs in obsDict[uObs]:
 			tempScore = 0.0; # to accumilate score
+			# foreach class in observation
 			for cls in filData[int(obs)-1][3]:
 				tempScore += uniClass[int(cls)];
-			
-			workCount.append(filData[int(obs)-1][1]) # add the items to the list
+				if uniClass[int(cls)] == maxVal:	
+					tempMaxCount.append(filData[int(obs)-1][1]);
+				elif uniClass[int(cls)] == minVal:
+					tempMinCount.append(filData[int(obs)-1][1]);
+			workCount.append(filData[int(obs)-1][1]) # add the worker to the list
 
-			# normalize for the number of classes they have chosen
+			# normalize for the number of classes they have chosen per obs
 			l = float(len(filData[int(obs)-1][3]))
 			workDict[filData[int(obs)-1][1]] += tempScore/l;
-	
-	# count the word occurences
+
+		tempMaxCount = set(tempMaxCount);
+		maxCount.extend(tempMaxCount);
+
+		tempMinCount = set(tempMinCount);
+		minCount.extend(tempMinCount);
+
+	# take headcounts of workers for max scoring and min scoring
+	maxCount = dict(Counter(maxCount));
+	minCount = dict(Counter(minCount));
+
+	# count the total worker occurences
 	workCount = dict(Counter(workCount));
 
 	# normalize for number of jobs per user
 	for worker in workDict:
-		workDict[worker]/=float(workCount[worker]);
+		f = float(workCount[worker]);
 
-	return workDict
+		temp = [worker,workCount[worker],workDict[worker]/f]; # normalise score per jobs
+	
+		# normalise max scores per jobs
+		if worker in maxCount:
+			temp.append(maxCount[worker]/f); 
+		else: 
+			temp.append(0.0);
+
+		# normalise min scores per jobs
+		if worker in minCount:
+			temp.append(minCount[worker]/f);
+		else:
+			temp.append(0.0);
+		
+		workStats.append(temp);
+
+		# workDict[worker] = [workDict[worker], maxCount[worker]/float(workCount[worker], minCount[worker]/float(workCount[worker]]
+
+	return workStats
 
 ## this function write the worker trust scorecard to the csv file in the HDD
 def writeScorecard(file,scoreCard):
@@ -89,4 +132,4 @@ def writeScorecard(file,scoreCard):
 
 	# foreach row in the filtered dataset
 	for row in scoreCard:
-		realFile.writerow( [row, scoreCard[row]]); # write to file
+		realFile.writerow(row); # write to file
