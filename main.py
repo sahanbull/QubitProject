@@ -1,9 +1,12 @@
 
 ####################### import pacakages #####################
 
+import numpy;
+
 import qbPreprocess as qbPre
 import qbReliability as qbRel
 import qbGlobals as qbGbl
+import qbPrepare as qbPrepare
 
 ########################## Main functions ########################
 
@@ -52,7 +55,10 @@ def prepareData(type):
 def preProcessData(type):
 	# load the cleaned dataset
 	filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
-	print qbGbl.wordIDFDict
+	X = qbPrepare.generateX(filData);
+	
+	return [filData,X] 
+
 
 
 ########################## Main Script ########################
@@ -68,4 +74,7 @@ def preProcessData(type):
 type = '100';
 #prepareData(type);
 
-preProcessData(type);
+pack = preProcessData(type);
+
+initData = pack[0];
+dataX = pack[1];
