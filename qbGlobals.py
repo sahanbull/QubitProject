@@ -20,6 +20,11 @@ classDict = {};
 clsDictFileName = '{0}\\classDict.csv'.format(att);
 
 
+classUIRef = {};
+
+classUIRefFileName = '{0}\\classUIRef.csv'.format(att);
+
+
 wordRefDict = {};
 
 wordRefDictFileName = '{0}\\wordRefDict'.format(att);
