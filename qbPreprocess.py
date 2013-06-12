@@ -78,8 +78,11 @@ def writeUsableCSV(file,filData):
 def genClassDict(field,index):
 	for tmpCls in field:
 		if tmpCls not in qbGbl.classDict:
-			qbGbl.classDict[tmpCls] = index;
-			index+=1; 
+			if tmpCls == 'None':
+				qbGbl.classDict[tmpCls] = 99;
+			else:
+				qbGbl.classDict[tmpCls] = index;
+				index+=1; 
 	return index
 
 ## this function writes the dictionary to the specified file
@@ -216,7 +219,7 @@ def importFilCSV(file):
 	# reads the csv content
 	realFile = csv.reader(csvFile, delimiter=',');
 	
-	index = 1;
+	index = 0; # to uniquely index classes
 	for row in realFile:
 		# segment multiple classes
 		row[3]=convClasses(row[3],'|');
@@ -229,8 +232,8 @@ def importFilCSV(file):
 		# 3: classified classes
 		filData.append(row);
 
-	saveClassDict(qbGbl.clsDictFileName)
-	
+	saveClassDict(qbGbl.clsDictFileName);
+
 	return filData
 
 ## this function tokenizes a string and returns the list of strings
