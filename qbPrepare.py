@@ -17,13 +17,19 @@ def generateX(filData):
 	obs = len(filData);
 	dim = len(qbGbl.wordIDFDict)
 	
+	print obs;
+	print dim
 	X = numpy.zeros([obs,dim]);
 
-	for row in filData:
-		tfidf = dict(Counter(row[1]));
-		for word in tfidf:
-			tfidf[word] = tfidf[word]*qbGbl.wordIDFDict[word];
-			X[int(row[0])-1,word] = tfidf[word];
+	# for row in filData:
+	# 	tfidf = dict(Counter(row[1]));
+	# 	for word in tfidf:
+	# 		tfidf[word] = tfidf[word]*qbGbl.wordIDFDict[word];
+	# 		X[int(row[0]),word] = tfidf[word];
 		
 	return X;	
+
+def generateY(filData):
+	obs = len(filData);
+	# cls = len(qbGbl.)
 	
