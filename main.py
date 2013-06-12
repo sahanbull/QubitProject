@@ -12,7 +12,7 @@ import qbPrepare as qbPrepare
 
 def filterData():
 	filData = []; # to store the filtered dataset
-	count = 1; # to keep the counter
+	count = 0; # to keep the counter
 
 	# read original file and load the relevant data
 	# list all the csv log files with records
@@ -31,13 +31,15 @@ def doReliabilityScoring():
 	# load the filtered dataset
 	filData = qbPre.importFilCSV(qbGbl.filFileName);
 
-	# generate observation list
+	qbGbl.classUIRef = qbRel.readclsUIRef(qbGbl.classUIRefFileName);
+
+	## generate observation list
 	obsDict = qbRel.genObsDict(filData);
 	
-	# generate worker list 
+	## generate worker list 
 	workDict = qbRel.genWorkDict(filData); 
 
-	scoreCard = qbRel.scoreWorkers(obsDict,workDict,filData)
+	scoreCard = qbRel.scoreWorkers(obsDict,workDict,filData);
 
 	return scoreCard
 
@@ -56,6 +58,7 @@ def preProcessData(type):
 	# load the cleaned dataset
 	filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
 	X = qbPrepare.generateX(filData);
+	Y = qbPrepare.generateY(filData);
 	
 	return [filData,X] 
 
@@ -63,17 +66,20 @@ def preProcessData(type):
 ########################## Main Script ########################
 
 ## filter the data from the main dataset and write the only relevant files to new file
-#filterData()	
+# filterData()	
 
 ## carry out reliabilty scoring and then write results to a CSV file
 scoreCard = doReliabilityScoring();
-qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
+# qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
 ## start tokenizing the stuff
-# type = '100';
-#prepareData(type);
+type = '100';
+# prepareData(type);
+
 
 # pack = preProcessData(type);
 
 # initData = pack[0];
 # dataX = pack[1];
+
+# print dataX
