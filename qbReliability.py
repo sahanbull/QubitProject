@@ -4,8 +4,32 @@ import tokenize
 import cStringIO
 from collections import Counter
 import csv
+import matplotlib as mpl
 
 import qbGlobals as qbGbl
+
+####################### read the reference attributes ##########
+
+def readclsUIRef(file):
+
+	# to store the reading dataset
+	classDict= qbGbl.classDict
+	classUIDict= {};
+
+	# opens the csv file
+	csvFile = open(file,'rb');
+
+	# reads the csv content
+	realFile = csv.reader(csvFile, delimiter=',');
+
+	for row in realFile:
+		try:
+			classUIDict[classDict[row[0]]] = int(row[1]);
+		except e:
+			print 'class {0} missing in the dataset'.format(row[0]);
+
+	return classUIDict	
+
 
 ######################## Do realiability Analysis ###############
 
@@ -38,7 +62,9 @@ def scoreWorkers(obsDict,workDict,filData):
 	maxCount = []; # to store number of time worker hits maximum points
 	minCount = []; # to count number of time worker hits minimum points
 	workStats = [];
-	#workStats = ["worker_id","no_of_jobs","score","max_score_ratio","min_score_ratio"];
+	# workStats = ["worker_id","no_of_jobs","score","max_score_ratio","min_score_ratio"];
+
+	topicCount = []; # to store the topic ditribution
 
 	# foreach feedback in list
 	for uObs in obsDict:
@@ -47,7 +73,9 @@ def scoreWorkers(obsDict,workDict,filData):
 		# foreach obseravation with same feedback, different workers
 		for obs in obsDict[uObs]:
 			# build a collection
-			colClass.extend(filData[int(obs)-1][3]);
+			colClass.extend(filData[int(obs)][3]);
+
+		topicCount.extend(colClass);	
 		# count the class frequency among different workers for the feedback
 		uniClass = dict(Counter(colClass));
 		
@@ -58,11 +86,11 @@ def scoreWorkers(obsDict,workDict,filData):
 			# normalize for number of workers
 			uniClass[obs] = float(uniClass[obs])/float(len(obsDict[uObs]));
 		
-		print uniClass
+		#print uniClass
 		maxVal = uniClass[max(uniClass, key = uniClass.get)];
-		print maxVal
+		#print maxVal
 		minVal = uniClass[min(uniClass, key = uniClass.get)];
-		print minVal
+		#print minVal
 		
 
 		## start scoring for workers by observation	>>
@@ -72,17 +100,17 @@ def scoreWorkers(obsDict,workDict,filData):
 		for obs in obsDict[uObs]:
 			tempScore = 0.0; # to accumilate score
 			# foreach class in observation
-			for cls in filData[int(obs)-1][3]:
+			for cls in filData[int(obs)][3]:
 				tempScore += uniClass[int(cls)];
 				if uniClass[int(cls)] == maxVal:	
-					tempMaxCount.append(filData[int(obs)-1][1]);
+					tempMaxCount.append(filData[int(obs)][1]);
 				elif uniClass[int(cls)] == minVal:
-					tempMinCount.append(filData[int(obs)-1][1]);
-			workCount.append(filData[int(obs)-1][1]) # add the worker to the list
+					tempMinCount.append(filData[int(obs)][1]);
+			workCount.append(filData[int(obs)][1]) # add the worker to the list
 
 			# normalize for the number of classes they have chosen per obs
-			l = float(len(filData[int(obs)-1][3]))
-			workDict[filData[int(obs)-1][1]] += tempScore/l;
+			l = float(len(filData[int(obs)][3]))
+			workDict[filData[int(obs)][1]] += tempScore/l;
 
 		tempMaxCount = set(tempMaxCount);
 		maxCount.extend(tempMaxCount);
@@ -116,8 +144,6 @@ def scoreWorkers(obsDict,workDict,filData):
 			temp.append(0.0);
 		
 		workStats.append(temp);
-
-		# workDict[worker] = [workDict[worker], maxCount[worker]/float(workCount[worker], minCount[worker]/float(workCount[worker]]
 
 	return workStats
 
