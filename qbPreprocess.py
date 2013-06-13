@@ -11,6 +11,21 @@ import qbGlobals as qbGbl
 
 ######################## Preprocess data #########################
 
+## this function reads a simple file
+def readSimpleFile(file):
+	filData = []; # stores the filtered dataset with only the relevant fields
+
+	# opens the csv file
+	csvFile = open(file,'rb');
+
+	# reads the csv content
+	realFile = csv.reader(csvFile, delimiter=',');
+
+	for row in realFile:
+		filData.append(row)
+
+	return filData
+
 ## this function returns all the file paths with .csv extension in the directory
 def listFiles(path):
 	path = '{0}\\*.csv'.format(path);
