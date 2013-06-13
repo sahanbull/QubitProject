@@ -4,9 +4,13 @@ import tokenize
 import cStringIO
 from collections import Counter
 import csv
+import numpy
+import scipy.stats
 import matplotlib as mpl
+import random
 
 import qbGlobals as qbGbl
+import qbPreprocess as qbPre
 
 ####################### read the reference attributes ##########
 
@@ -61,8 +65,8 @@ def scoreWorkers(obsDict,workDict,filData):
 	workCount = []; 
 	maxCount = []; # to store number of time worker hits maximum points
 	minCount = []; # to count number of time worker hits minimum points
-	workStats = [];
-	# workStats = ["worker_id","no_of_jobs","score","max_score_ratio","min_score_ratio"];
+	workStats = []; # to store the user statistics at the end :)
+	workTopics = {}; # to store the topic distribution per worker
 
 	topicCount = []; # to store the topic ditribution
 
@@ -70,12 +74,21 @@ def scoreWorkers(obsDict,workDict,filData):
 	for uObs in obsDict:
 
 		colClass = []; # to store the class occurences in each observation
+
 		# foreach obseravation with same feedback, different workers
 		for obs in obsDict[uObs]:
 			# build a collection
 			colClass.extend(filData[int(obs)][3]);
 
+			# update userwise topic count
+			if filData[int(obs)][1] not in workTopics:
+				workTopics[filData[int(obs)][1]] = colClass;
+			else:
+				workTopics[filData[int(obs)][1]].extend(colClass);
+
+		# add the topics to the topic count list
 		topicCount.extend(colClass);	
+
 		# count the class frequency among different workers for the feedback
 		uniClass = dict(Counter(colClass));
 		
@@ -125,8 +138,24 @@ def scoreWorkers(obsDict,workDict,filData):
 	# count the total worker occurences
 	workCount = dict(Counter(workCount));
 
-	# normalize for number of jobs per user
+	# print workTopics
+
+	# foreach worker,
 	for worker in workDict:
+		## COMPUTE THE WORKER WISE LIST COMPUTATIONS
+		# topic distribution per user
+		wrkTpcCount = Counter(workTopics[worker]);
+		# print wrkTpcCount;
+		tempTpc = {};
+		# change labels to the UI ref order
+		for topic in wrkTpcCount:
+			tempTpc[qbGbl.classUIRef[topic]] = wrkTpcCount[topic];
+
+		workTopics[worker] = list(Counter(tempTpc).elements());
+
+
+		## COMPUTE THE USER COLLECTIVE STATISTICS
+		# normalize for number of jobs per user
 		f = float(workCount[worker]);
 
 		temp = [worker,workCount[worker],workDict[worker]/f]; # normalise score per jobs
@@ -143,7 +172,27 @@ def scoreWorkers(obsDict,workDict,filData):
 		else:
 			temp.append(0.0);
 		
+		temp.append(scipy.stats.tmean(workTopics[worker])); # mean of class selection
+		temp.append(scipy.stats.mode(workTopics[worker])[0][0]); # mode of class selection
+		temp.append(scipy.stats.mode(workTopics[worker])[1][0]/len(workTopics[worker])); # mode freaquency
+		temp.append(scipy.stats.cmedian(workTopics[worker])); # median of class selection
+
+		# update worker statistics
 		workStats.append(temp);
+
+	# count the occurences
+	topicCount = Counter(topicCount);
+
+	# change labels to the UI ref order
+	for topic in topicCount:
+		qbGbl.topicHist[qbGbl.classUIRef[topic]] = topicCount[topic];
+
+	qbGbl.topicHist = list(Counter(qbGbl.topicHist).elements())
+	# qbGbl.topicHist COMPLETE
+	# print qbGbl.topicHist COMPLETE
+
+	qbGbl.workTopics = workTopics;
+	#print qbGbl.workTopics COMPLETE
 
 	return workStats
 
@@ -158,4 +207,43 @@ def writeScorecard(file,scoreCard):
 
 	# foreach row in the filtered dataset
 	for row in scoreCard:
+		if row[1]<100:
+			continue
+
 		realFile.writerow(row); # write to file
+
+## this function does the difficulty scoring for observations		
+def scoreObsComplex(obsDict,filData):
+
+	obsScore = {};
+	# foreach feedback in list
+	for uObs in obsDict:
+
+		colClass = []; # to store the class occurences in each observation
+		# foreach obseravation with same feedback, different workers
+		for obs in obsDict[uObs]:
+			# build a collection
+			colClass.extend(filData[int(obs)][3]);
+
+		uniClass = dict(Counter(colClass));
+		
+		# foreach dictionary entry, 
+		for obs in uniClass:
+			# normalize for number of workers
+			uniClass[obs] = float(uniClass[obs])/float(len(obsDict[uObs]));
+		
+		# sum up concordence score and normalise over number of obeservation	
+		score = sum(uniClass.values())/float(len(uniClass));
+
+		obsScore[uObs] = score;
+		
+	return obsScore
+
+## this function generates a random sample of observations for golden set verifications
+def goldenSet(number):
+	# load the filtered dataset
+	filData = qbPre.readSimpleFile('data\\write\\fil_comb_results.csv');
+
+	ranSample = random.sample(filData, number);
+
+	qbPre.writeFilCSV('data\\relAnalytics\\goldenSet.csv',ranSample);
