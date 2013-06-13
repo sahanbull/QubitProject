@@ -43,6 +43,17 @@ def doReliabilityScoring():
 
 	return scoreCard
 
+def doObsComplexityScoring():
+	# load the filtered dataset
+	filData = qbPre.importFilCSV(qbGbl.filFileName);
+
+	## generate observation list
+	obsDict = qbRel.genObsDict(filData);
+	
+	obsComplexity = qbRel.scoreObsComplex(obsDict,filData);
+
+	return obsComplexity;
+
 ## this funciton tokenizes the words
 def prepareData(type):
 	# load the filtered dataset
@@ -66,17 +77,23 @@ def preProcessData(type):
 ########################## Main Script ########################
 
 ## filter the data from the main dataset and write the only relevant files to new file
-# filterData()	
+#filterData()	
 
 ## carry out reliabilty scoring and then write results to a CSV file
-scoreCard = doReliabilityScoring();
+# scoreCard = doReliabilityScoring();
+# qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
+
+## carry out reliabilty scoring and then write results to a CSV file
+#obsComplexity = doObsComplexityScoring();
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
 ## start tokenizing the stuff
 type = '100';
 # prepareData(type);
 
+qbRel.goldenSet(100);
 
+## carry out word scoring and related statistics
 # pack = preProcessData(type);
 
 # initData = pack[0];
