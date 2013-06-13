@@ -9,7 +9,7 @@ filFileName = 'data\\write\\fil_comb_results.csv';
 dataSetFileName = 'data\\write\\dataSet'
 
 # where to record worker scorecards
-scoreFileName = 'data\\write\\worker_scorecard.csv'
+scoreFileName = 'data\\relAnalytics\\worker_scorecard.csv'
 
 # to store required attributes
 att = 'data\\attributes';
@@ -35,5 +35,8 @@ wordIDFDict = {};
 wordIDFDictFileName = '{0}\\wordIDFDict'.format(att);
 
 
+## lists and data items for visual analytics
 
-# preprocess the data 
+topicHist = {}; # to store the topic ditribution
+
+workTopics = {}; # to store the topic distribution per worker
