@@ -65,6 +65,7 @@ def scoreWorkers(obsDict,workDict,filData):
 	workCount = []; 
 	maxCount = []; # to store number of time worker hits maximum points
 	minCount = []; # to count number of time worker hits minimum points
+	perfectCount = []; # to count  the number of times worker hits 1.0
 	workStats = []; # to store the user statistics at the end :)
 	workTopics = {}; # to store the topic distribution per worker
 
@@ -99,16 +100,23 @@ def scoreWorkers(obsDict,workDict,filData):
 			# normalize for number of workers
 			uniClass[obs] = float(uniClass[obs])/float(len(obsDict[uObs]));
 		
+		# sum up concordence score and normalise over number of obeservations
+		# observation concordence score	
+		obsScore = sum(uniClass.values())/float(len(uniClass));
+
+		# print obsScore
+
 		#print uniClass
 		maxVal = uniClass[max(uniClass, key = uniClass.get)];
 		#print maxVal
 		minVal = uniClass[min(uniClass, key = uniClass.get)];
 		#print minVal
-		
 
 		## start scoring for workers by observation	>>
 		tempMaxCount = [];
 		tempMinCount = [];
+		tempPerfectCount = [];
+
 		# foreach obseravation with same feedback, different workers
 		for obs in obsDict[uObs]:
 			tempScore = 0.0; # to accumilate score
@@ -120,7 +128,9 @@ def scoreWorkers(obsDict,workDict,filData):
 				elif uniClass[int(cls)] == minVal:
 					tempMinCount.append(filData[int(obs)][1]);
 			workCount.append(filData[int(obs)][1]) # add the worker to the list
-
+			if obsScore == 1.0: # if perfect 1.0, 
+				tempPerfectCount.append(filData[int(obs)][1]);
+				# print 'poing'
 			# normalize for the number of classes they have chosen per obs
 			l = float(len(filData[int(obs)][3]))
 			workDict[filData[int(obs)][1]] += tempScore/l;
@@ -131,6 +141,11 @@ def scoreWorkers(obsDict,workDict,filData):
 		tempMinCount = set(tempMinCount);
 		minCount.extend(tempMinCount);
 
+		#print tempPerfectCount
+		tempPerfectCount = set(tempPerfectCount);
+		#print tempPerfectCount
+		perfectCount.extend(tempPerfectCount);
+
 	# take headcounts of workers for max scoring and min scoring
 	maxCount = dict(Counter(maxCount));
 	minCount = dict(Counter(minCount));
@@ -138,6 +153,9 @@ def scoreWorkers(obsDict,workDict,filData):
 	# count the total worker occurences
 	workCount = dict(Counter(workCount));
 
+	perfectCount = dict(Counter(perfectCount));
+	
+	# print perfectCount
 	# print workTopics
 
 	# foreach worker,
@@ -158,7 +176,13 @@ def scoreWorkers(obsDict,workDict,filData):
 		# normalize for number of jobs per user
 		f = float(workCount[worker]);
 
-		temp = [worker,workCount[worker],workDict[worker]/f]; # normalise score per jobs
+		if worker in perfectCount:
+			perfectness = float(perfectCount[worker]);
+			perfectness /= float(maxCount[worker]);
+		else: 
+			perfectness = 0.0;	
+
+		temp = [worker,workCount[worker],workDict[worker]/f,perfectness]; # normalise score per jobs
 	
 		# normalise max scores per jobs
 		if worker in maxCount:
@@ -193,6 +217,10 @@ def scoreWorkers(obsDict,workDict,filData):
 
 	qbGbl.workTopics = workTopics;
 	#print qbGbl.workTopics COMPLETE
+
+	# print len(obsDict)
+
+	print len (workStats)
 
 	return workStats
 
