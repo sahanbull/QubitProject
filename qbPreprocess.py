@@ -6,6 +6,9 @@ import csv
 import glob
 import re
 import nltk.tokenize as nltkTok
+import enchant
+from enchant.checker import SpellChecker
+import nltk
 
 import qbGlobals as qbGbl
 
@@ -28,7 +31,9 @@ def readSimpleFile(file):
 
 ## this function returns all the file paths with .csv extension in the directory
 def listFiles(path):
-	path = '{0}\\*.csv'.format(path);
+	path = '{0}/*.csv'.format(path);
+
+	print path
 	paths = glob.glob(path)
 	return paths
 
@@ -181,10 +186,15 @@ def readFile(file,type):
 	csvFile = open(file,'rb');
 
 	# reads the csv content
-	realFile = csv.reader(csvFile, delimiter=',');
+	realFile = csv.reader(csvFile, delimiter=',', quoting=csv.QUOTE_NONNUMERIC);
 
 	index = 0;
 	for row in realFile:
+		# segment multiple classes
+		temp =convClasses(row[2],'|');
+		row[2] = conv2ClsDict(temp)
+
+		# tokenize the feedback
 		tempRow = tokenStr(row[1]);
 	 	bundle = updateWordRefDict(tempRow,index);
 
@@ -209,7 +219,7 @@ def readFile(file,type):
 
 	return filData
 	
-## this function conversts the string of classification to useable list
+## this function conversts the string of classification to useable list, >> Split it
 def convClasses(field,split):
 	temp = field.split(split);
 	return temp;
@@ -223,7 +233,7 @@ def conv2ClsDict(field):
 	return newField
 
 ## this funciton imports the specified data set given in the string
-def importFilCSV(file):
+def importFilCSV(file,flag):
 
 	# to store the reading dataset
 	filData = [];
@@ -237,10 +247,12 @@ def importFilCSV(file):
 	index = 0; # to uniquely index classes
 	for row in realFile:
 		# segment multiple classes
-		row[3]=convClasses(row[3],'|');
-		index = genClassDict(row[3],index);
+		temp =convClasses(row[3],'|');
+		index = genClassDict(temp,index);
 
-		row[3] = conv2ClsDict(row[3])
+		if flag:
+			row[3] = conv2ClsDict(temp)
+
 		# 0: ref ID
 		# 1: worker ID
 		# 2: feedback content
@@ -267,14 +279,39 @@ def simplify(str):
 def toLower(str):
 	return str.lower();
 
+## this function corrects all the spelling
+def doSpelling(str):
+	
+	chkr = SpellChecker("en_GB"); # any english dictionary
+
+	chkr.set_text(str);
+
+
+	## we can do more similarity ratio checks as well :P right now pick the best match
+	for err in chkr:
+		str = re.sub(err.word,chkr.suggest(err.word)[0],str)
+
+	# tempStr = tokenStr(str);
+	# for word in tempStr:
+	# 	if not d.check(word):
+	# 		d.suggest(word);
+
+	return str
+
+## this function does the stemming for the words
+def doStemming(str):
+	# nltk.
+
+	return str
+
 ## this function standardizes the text field
 def standadiseString(str,type):
-	if type[1]==1:
-		pass
-	if type[2]==1:
-		pass
-	if type[0]=='1':	 
-		str = simplify(str);
+	if type[1] == '1':
+		str = doSpelling(str);
+	if type[2] == '1':
+		str = doStemming(str);
+	if type[0] == '1':	 
+		str = simplify(str);	
 
 	str = toLower(str);	
 
