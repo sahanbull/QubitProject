@@ -29,7 +29,7 @@ def filterData():
 
 def doReliabilityScoring():
 	# load the filtered dataset
-	filData = qbPre.importFilCSV(qbGbl.filFileName);
+	filData = qbPre.importFilCSV(qbGbl.filFileName,True);
 
 	qbGbl.classUIRef = qbRel.readclsUIRef(qbGbl.classUIRefFileName);
 
@@ -45,7 +45,7 @@ def doReliabilityScoring():
 
 def doObsComplexityScoring():
 	# load the filtered dataset
-	filData = qbPre.importFilCSV(qbGbl.filFileName);
+	filData = qbPre.importFilCSV(qbGbl.filFileName,True);
 
 	## generate observation list
 	obsDict = qbRel.genObsDict(filData);
@@ -57,8 +57,8 @@ def doObsComplexityScoring():
 ## this funciton tokenizes the words
 def prepareData(type):
 	# load the filtered dataset
-	filData = qbPre.importFilCSV(qbGbl.filFileName);
-
+	filData = qbPre.importFilCSV(qbGbl.filFileName,False);
+	# print filData
 	filData = qbPre.prepareData(filData,type);
 
 	# write filtered data to a different file in the HDD 
@@ -68,35 +68,31 @@ def prepareData(type):
 def preProcessData(type):
 	# load the cleaned dataset
 	filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
+
 	X = qbPrepare.generateX(filData);
 	Y = qbPrepare.generateY(filData);
 	
-	return [filData,X] 
+	return [filData,X,Y] 
 
 
 ########################## Main Script ########################
 
 ## filter the data from the main dataset and write the only relevant files to new file
-#filterData()	
+# filterData()	
 
 ## carry out reliabilty scoring and then write results to a CSV file
 # scoreCard = doReliabilityScoring();
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
 ## carry out reliabilty scoring and then write results to a CSV file
-#obsComplexity = doObsComplexityScoring();
+# obsComplexity = doObsComplexityScoring();
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
 ## start tokenizing the stuff
-type = '100';
-# prepareData(type);
+type = '111';
+prepareData(type);
 
-qbRel.goldenSet(100);
+# qbRel.goldenSet(100);
 
 ## carry out word scoring and related statistics
-# pack = preProcessData(type);
-
-# initData = pack[0];
-# dataX = pack[1];
-
-# print dataX
+# initData, dataX, dataY = preProcessData(type);
