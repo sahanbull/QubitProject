@@ -300,7 +300,13 @@ def doSpelling(str):
 
 ## this function does the stemming for the words
 def doStemming(str):
-	# nltk.
+	myStemmer = nltk.stem.porter.PorterStemmer() # Portor's Stemmer
+	tempStr = tokenStr(str);
+
+	str = "";
+	for word in tempStr:
+		str += myStemmer.stem(word) + " "
+	str = str.strip();
 
 	return str
 
