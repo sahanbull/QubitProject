@@ -19,5 +19,5 @@ portray online algorithm nature to improve scalability and performance.
 
 Technologies used:
   Python scikit-learn
-  Python numpy, scipy, matplotlib
-  Python pyhunspell
+  Python numpy, scipy, matplotlib, pandas
+  Python nltk
