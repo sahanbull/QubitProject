@@ -5,6 +5,8 @@ oriFileName = 'data/read';
 
 filFileName = 'data/write/fil_comb_results.csv';
 
+newSampFileName = '/seededfeedback.clean.txt';
+
 # record simple only dataset
 dataSetFileName = 'data/write/dataSet'
 
@@ -44,3 +46,7 @@ scoreFileName = 'data/relAnalytics/worker_scorecard.csv'
 topicHist = {}; # to store the topic ditribution
 
 workTopics = {}; # to store the topic distribution per worker
+
+## full concordence topics
+
+fullConFeedbacks = [];
