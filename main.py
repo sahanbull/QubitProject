@@ -43,6 +43,11 @@ def doReliabilityScoring():
 
 	return scoreCard
 
+def generateNewData():
+	# run to generate the global full concordence set
+	notNeeded = doReliabilityScoring();
+	qbRel.generateSample(qbGbl.fullConFeedbacks,10000,'{0}{1}'.format(qbGbl.oriFileName,qbGbl.newSampFileName),80000)
+
 def doObsComplexityScoring():
 	# load the filtered dataset
 	filData = qbPre.importFilCSV(qbGbl.filFileName,True);
@@ -88,9 +93,11 @@ def preProcessData(type):
 # obsComplexity = doObsComplexityScoring();
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
+generateNewData()
+
 ## start tokenizing the stuff
-type = '111';
-prepareData(type);
+# type = '111';
+#prepareData(type);
 
 # qbRel.goldenSet(100);
 
