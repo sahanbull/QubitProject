@@ -9,6 +9,7 @@ import nltk.tokenize as nltkTok
 import enchant
 from enchant.checker import SpellChecker
 import nltk
+import pandas as pd
 
 import qbGlobals as qbGbl
 
@@ -334,3 +335,8 @@ def prepareData(filData,type):
 		tempfilData.append([row[0],str,row[3]]);
 	
 	return tempfilData
+
+def readDataFrame(filename,skpRows,hdr):
+	data = pd.read_csv(filename,header=hdr,skiprows=skpRows);
+
+	return data
