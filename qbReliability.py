@@ -8,6 +8,7 @@ import numpy
 import scipy.stats
 import matplotlib as mpl
 import random
+import pandas as pd
 
 import qbGlobals as qbGbl
 import qbPreprocess as qbPre
@@ -130,6 +131,7 @@ def scoreWorkers(obsDict,workDict,filData):
 			workCount.append(filData[int(obs)][1]) # add the worker to the list
 			if obsScore == 1.0: # if perfect 1.0, 
 				tempPerfectCount.append(filData[int(obs)][1]);
+				qbGbl.fullConFeedbacks.append(filData[int(obs)][2])
 				# print 'poing'
 			# normalize for the number of classes they have chosen per obs
 			l = float(len(filData[int(obs)][3]))
@@ -220,7 +222,7 @@ def scoreWorkers(obsDict,workDict,filData):
 
 	# print len(obsDict)
 
-	print len (workStats)
+	qbGbl.fullConFeedbacks = set(qbGbl.fullConFeedbacks)
 
 	return workStats
 
@@ -270,8 +272,42 @@ def scoreObsComplex(obsDict,filData):
 ## this function generates a random sample of observations for golden set verifications
 def goldenSet(number):
 	# load the filtered dataset
-	filData = qbPre.readSimpleFile('data\\write\\fil_comb_results.csv');
+	filData = qbPre.readSimpleFile('data/write/fil_comb_results.csv');
 
 	ranSample = random.sample(filData, number);
 
-	qbPre.writeFilCSV('data\\relAnalytics\\goldenSet.csv',ranSample);
+	qbPre.writeFilCSV('data/relAnalytics/goldenSet.csv',ranSample);
+
+## pick row dataset to find the old ones
+def pickRowDataset():
+	newData = qbPre.readDataFrame('{0}/Batch_1123120_batch_results.csv'.format(qbGbl.oriFileName),None,0);
+	data = pd.DataFrame(newData['Input.pv_id'], columns= ['pv_id'])
+	
+	data['global_user_id'] = newData['Input.global_user_id'];
+	data['time'] = newData['Input.time'];
+	data['declaration'] = newData['Input.declaration'];
+
+	return data
+
+## this function generates a sample mixing old and new data in given proportions
+def generateSample(fulConSet,m,newFileName,n):
+	oldSample = list(fulConSet);
+
+	oldData = pickRowDataset()
+
+	# while len(oldSample) < m:
+	# 	oldSample.extend(fulConSet);
+	# 	random.shuffle(oldSample);
+	# sample = random.sample(oldSample,m);
+
+	# # load the filtered dataset
+	# newData = qbPre.readDataFrame(newFileName,xrange(1,15001),0)['declaration'];
+	# newSample = random.sample(newData,n);
+
+	# sample.extend(newSample);
+	
+	# random.shuffle(sample)
+
+	# sample = pd.DataFrame(sample,columns= ['declaration'])
+	# sample.to_csv('data/write/newFeedbackSample.csv',index = False);
+	
