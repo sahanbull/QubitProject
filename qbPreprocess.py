@@ -236,40 +236,33 @@ def conv2ClsDict(field):
 ## this funciton imports the specified data set given in the string
 def importFilCSV(file,flag):
 
-	pass	
+	# to store the reading dataset
+	filData = [];
 
+	# opens the csv file
+	csvFile = open(file,'rb');
 
-
-
-
-
-	# # to store the reading dataset
-	# filData = [];
-
-	# # opens the csv file
-	# csvFile = open(file,'rb');
-
-	# # reads the csv content
-	# realFile = csv.reader(csvFile, delimiter=',');
+	# reads the csv content
+	realFile = csv.reader(csvFile, delimiter=',');
 	
-	# index = 0; # to uniquely index classes
-	# for row in realFile:
-	# 	# segment multiple classes
-	# 	temp =convClasses(row[3],'|');
-	# 	index = genClassDict(temp,index);
+	index = 0; # to uniquely index classes
+	for row in realFile:
+		# segment multiple classes
+		temp =convClasses(row[3],'|');
+		index = genClassDict(temp,index);
 
-	# 	if flag:
-	# 		row[3] = conv2ClsDict(temp)
+		if flag:
+			row[3] = conv2ClsDict(temp)
 
-	# 	# 0: ref ID
-	# 	# 1: worker ID
-	# 	# 2: feedback content
-	# 	# 3: classified classes
-	# 	filData.append(row);
+		# 0: ref ID
+		# 1: worker ID
+		# 2: feedback content
+		# 3: classified classes
+		filData.append(row);
 
-	# saveClassDict(qbGbl.clsDictFileName);
+	saveClassDict(qbGbl.clsDictFileName);
 
-	# return filData
+	return filData
 
 ## this function tokenizes a string and returns the list of strings
 def tokenStr(str):
@@ -348,7 +341,7 @@ def prepareData(filData,type):
 	
 	return tempfilData
 
-def readDataFrame(filename,skpRows,hdr,idxCol):
-	data = pd.read_csv(filename,skiprows=skpRows,header=hdr, index_col=idxCol);
+def readDataFrame(filename,skpRows,hdr):
+	data = pd.read_csv(filename,header=hdr,skiprows=skpRows);
 	
 	return data
