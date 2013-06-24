@@ -62,18 +62,12 @@ def doObsComplexityScoring():
 ## this funciton tokenizes the words
 def prepareData(type):
 	# load the filtered dataset
-	# filData = qbPre.importFilCSV(qbGbl.filFileName,False);
+	filData = qbPre.importFilCSV(qbGbl.filFileName,False);
+	 print filData
+	filData = qbPre.prepareData(filData,type);
 
-	# columns = ['']
-	filData = qbPre.readDataFrame(qbGbl.filFileName,None,None,0,columns)
-	print filData
-	# filData.columns = ['index','']
-
-	# print filData
-	# filData = qbPre.prepareData(filData,type);
-
-	# # write filtered data to a different file in the HDD 
-	# qbPre.writeFilCSV('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),filData);
+	# write filtered data to a different file in the HDD 
+	qbPre.writeFilCSV('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),filData);
 
 ## this function reads preProcessed Data and vectorise it
 def preProcessData(type):
@@ -108,4 +102,4 @@ prepareData(type);
 # qbRel.goldenSet(100);
 
 ## carry out word scoring and related statistics
-# initData, dataX, dataY = preProcessData(type);
+initData, dataX, dataY = preProcessData(type);
