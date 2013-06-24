@@ -291,23 +291,57 @@ def pickRowDataset():
 
 ## this function generates a sample mixing old and new data in given proportions
 def generateSample(fulConSet,m,newFileName,n):
-	oldSample = list(fulConSet);
 
+	# generate old data sample ================================
+
+	oldSample = pd.DataFrame(columns=('pv_id', 'global_user_id', 'time', 'declaration'));
+
+	# pick full information
 	oldData = pickRowDataset()
 
-	# while len(oldSample) < m:
-	# 	oldSample.extend(fulConSet);
-	# 	random.shuffle(oldSample);
-	# sample = random.sample(oldSample,m);
+	# generate and write the fully concorded for later reference to HDD
+	tempFulConSet = pd.DataFrame(list(fulConSet),columns = ['declaration'])
 
-	# # load the filtered dataset
-	# newData = qbPre.readDataFrame(newFileName,xrange(1,15001),0)['declaration'];
-	# newSample = random.sample(newData,n);
+	tempFulConSet.to_csv('data/relAnalytics/fulConSet.csv',index = False);
 
-	# sample.extend(newSample);
+	# find full info of the filly concorded occurences
+	for feedback in fulConSet:
+		p = oldData[oldData['declaration'] == feedback];
+		oldSample = oldSample.append(p[0:1],ignore_index=True)
+
+	# until the population > sample size
+	while len(oldSample) < m:
+		# double the population by duplicating 
+	 	oldSample = oldSample.append(oldSample,ignore_index=True);
+	 	oldSample.reindex();
+	 	# shuffle the observations
+	 	rows = list(oldSample.index);
+		random.shuffle(rows);
+		oldSample = oldSample.ix[rows]
+
 	
-	# random.shuffle(sample)
+	# reindex	
+	oldSample.reindex(rows)
+	# pick a random sample of size m
+	rows = random.sample(oldSample.index,m)
+	# random sample generated for old set
+	sample = oldSample.ix[rows]
 
-	# sample = pd.DataFrame(sample,columns= ['declaration'])
-	# sample.to_csv('data/write/newFeedbackSample.csv',index = False);
+	# generate new data sample =================================
+	# load the filtered dataset
+	newData = qbPre.readDataFrame(newFileName,xrange(1,15001),0);
+	# pick a random sample of size n
+	newRows = random.sample(newData.index,n);
+	newSample = newData.ix[newRows];
+
+	# aggregate the old and new samples to gether
+	sample = sample.append(newSample,ignore_index=True);
+	sample.reindex();
+	rows = list(sample.index);
+	# shuffle them
+	random.shuffle(rows);
+	sample = sample.ix[rows];
+
+	# generate csv file :D
+	sample.to_csv('data/write/newFeedbackSample.csv',index = False);
 	

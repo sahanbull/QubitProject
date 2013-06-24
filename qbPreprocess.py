@@ -34,7 +34,7 @@ def readSimpleFile(file):
 def listFiles(path):
 	path = '{0}/*.csv'.format(path);
 
-	print path
+	# print path
 	paths = glob.glob(path)
 	return paths
 
@@ -236,33 +236,40 @@ def conv2ClsDict(field):
 ## this funciton imports the specified data set given in the string
 def importFilCSV(file,flag):
 
-	# to store the reading dataset
-	filData = [];
+	pass	
 
-	# opens the csv file
-	csvFile = open(file,'rb');
 
-	# reads the csv content
-	realFile = csv.reader(csvFile, delimiter=',');
+
+
+
+
+	# # to store the reading dataset
+	# filData = [];
+
+	# # opens the csv file
+	# csvFile = open(file,'rb');
+
+	# # reads the csv content
+	# realFile = csv.reader(csvFile, delimiter=',');
 	
-	index = 0; # to uniquely index classes
-	for row in realFile:
-		# segment multiple classes
-		temp =convClasses(row[3],'|');
-		index = genClassDict(temp,index);
+	# index = 0; # to uniquely index classes
+	# for row in realFile:
+	# 	# segment multiple classes
+	# 	temp =convClasses(row[3],'|');
+	# 	index = genClassDict(temp,index);
 
-		if flag:
-			row[3] = conv2ClsDict(temp)
+	# 	if flag:
+	# 		row[3] = conv2ClsDict(temp)
 
-		# 0: ref ID
-		# 1: worker ID
-		# 2: feedback content
-		# 3: classified classes
-		filData.append(row);
+	# 	# 0: ref ID
+	# 	# 1: worker ID
+	# 	# 2: feedback content
+	# 	# 3: classified classes
+	# 	filData.append(row);
 
-	saveClassDict(qbGbl.clsDictFileName);
+	# saveClassDict(qbGbl.clsDictFileName);
 
-	return filData
+	# return filData
 
 ## this function tokenizes a string and returns the list of strings
 def tokenStr(str):
@@ -287,10 +294,15 @@ def doSpelling(str):
 
 	chkr.set_text(str);
 
-
 	## we can do more similarity ratio checks as well :P right now pick the best match
 	for err in chkr:
-		str = re.sub(err.word,chkr.suggest(err.word)[0],str)
+		try:
+			str = re.sub(err.word,chkr.suggest(err.word)[0],str)
+		except Exception, e:
+			print 'no suggestions: {0}'.format(err.word)
+			continue
+		
+		
 
 	# tempStr = tokenStr(str);
 	# for word in tempStr:
@@ -336,7 +348,7 @@ def prepareData(filData,type):
 	
 	return tempfilData
 
-def readDataFrame(filename,skpRows,hdr):
-	data = pd.read_csv(filename,header=hdr,skiprows=skpRows);
-
+def readDataFrame(filename,skpRows,hdr,idxCol):
+	data = pd.read_csv(filename,skiprows=skpRows,header=hdr, index_col=idxCol);
+	
 	return data

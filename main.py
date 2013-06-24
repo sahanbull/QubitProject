@@ -46,7 +46,7 @@ def doReliabilityScoring():
 def generateNewData():
 	# run to generate the global full concordence set
 	notNeeded = doReliabilityScoring();
-	qbRel.generateSample(qbGbl.fullConFeedbacks,10000,'{0}{1}'.format(qbGbl.oriFileName,qbGbl.newSampFileName),80000)
+	qbRel.generateSample(qbGbl.fullConFeedbacks,5000,'{0}{1}'.format(qbGbl.oriFileName,qbGbl.newSampFileName),40000)
 
 def doObsComplexityScoring():
 	# load the filtered dataset
@@ -62,12 +62,18 @@ def doObsComplexityScoring():
 ## this funciton tokenizes the words
 def prepareData(type):
 	# load the filtered dataset
-	filData = qbPre.importFilCSV(qbGbl.filFileName,False);
-	# print filData
-	filData = qbPre.prepareData(filData,type);
+	# filData = qbPre.importFilCSV(qbGbl.filFileName,False);
 
-	# write filtered data to a different file in the HDD 
-	qbPre.writeFilCSV('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),filData);
+	# columns = ['']
+	filData = qbPre.readDataFrame(qbGbl.filFileName,None,None,0,columns)
+	print filData
+	# filData.columns = ['index','']
+
+	# print filData
+	# filData = qbPre.prepareData(filData,type);
+
+	# # write filtered data to a different file in the HDD 
+	# qbPre.writeFilCSV('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),filData);
 
 ## this function reads preProcessed Data and vectorise it
 def preProcessData(type):
@@ -75,7 +81,7 @@ def preProcessData(type):
 	filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
 
 	X = qbPrepare.generateX(filData);
-	Y = qbPrepare.generateY(filData);
+	Y = []#qbPrepare.generateY(filData);
 	
 	return [filData,X,Y] 
 
@@ -93,11 +99,11 @@ def preProcessData(type):
 # obsComplexity = doObsComplexityScoring();
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
-generateNewData()
+# generateNewData()
 
-## start tokenizing the stuff
-# type = '111';
-#prepareData(type);
+# start tokenizing the stuff
+type = '100';
+prepareData(type);
 
 # qbRel.goldenSet(100);
 
