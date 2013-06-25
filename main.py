@@ -95,9 +95,7 @@ def preProcessData(type):
 def classifyData(X,Y):
 	XTrain, XTest, YTrain, YTest = qbPrepare.segmentData(X,Y,0.4);
 
-	print XTrain.shape,XTest.shape,YTrain.shape,YTest.shape
-
-	
+	qbPrepare.classify(XTrain,XTest,YTrain,YTest);
 
 
 
@@ -125,7 +123,7 @@ type = '100';
 # qbRel.goldenSet(100);
 
 ## carry out word scoring and related statistics
-# initData, dataX, dataY = preProcessData(type);
+initData, dataX, dataY = preProcessData(type);
 
 filData,X,Y = preProcessData(type);
 
