@@ -2,6 +2,7 @@
 ####################### import pacakages #####################
 
 import numpy;
+import pandas as pd;
 
 import qbPreprocess as qbPre
 import qbReliability as qbRel
@@ -63,21 +64,43 @@ def doObsComplexityScoring():
 def prepareData(type):
 	# load the filtered dataset
 	filData = qbPre.importFilCSV(qbGbl.filFileName,False);
-	 print filData
+	
 	filData = qbPre.prepareData(filData,type);
+	filData = pd.DataFrame(filData,columns=['index','declaration','answer'])
+	del filData['index']
+	# print filData
+	# generate csv file :D
+	filData.to_csv('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),index = False);
+	
 
 	# write filtered data to a different file in the HDD 
-	qbPre.writeFilCSV('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),filData);
+	# qbPre.writeFilCSV('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),filData);
 
 ## this function reads preProcessed Data and vectorise it
 def preProcessData(type):
 	# load the cleaned dataset
-	filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
+	# filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
+
+	filData = qbPre.readDataFrame('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),None,0);
+
+	# filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
 
 	X = qbPrepare.generateX(filData);
-	Y = []#qbPrepare.generateY(filData);
-	
+
+	Y = qbPrepare.generateY(filData);
+
 	return [filData,X,Y] 
+
+## this function takes X and Y and does everything necessary to classify them
+def classifyData(X,Y):
+	XTrain, XTest, YTrain, YTest = qbPrepare.segmentData(X,Y,0.4);
+
+	print XTrain.shape,XTest.shape,YTrain.shape,YTest.shape
+
+	
+
+
+
 
 
 ########################## Main Script ########################
@@ -97,9 +120,13 @@ def preProcessData(type):
 
 # start tokenizing the stuff
 type = '100';
-prepareData(type);
+# prepareData(type);
 
 # qbRel.goldenSet(100);
 
 ## carry out word scoring and related statistics
-initData, dataX, dataY = preProcessData(type);
+# initData, dataX, dataY = preProcessData(type);
+
+filData,X,Y = preProcessData(type);
+
+classifyData(X,Y)
