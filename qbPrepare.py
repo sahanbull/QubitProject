@@ -10,7 +10,11 @@ from sklearn.feature_extraction.text import CountVectorizer;
 
 from sklearn import cross_validation
 
-# import numpy; 
+from sklearn.multiclass import OneVsRestClassifier;
+from sklearn.svm import SVC
+
+
+import numpy; 
 
 import qbGlobals as qbGbl;
 
@@ -21,10 +25,11 @@ def generateX(filData):
 
 	# initiate transformer : tf-idf vectoriser
 	# token pattern changed to define single char tokens as words.. (default : 2+ chars -> word)
-	xTransformer = TfidfVectorizer(min_df=0.0,stop_words=None,token_pattern = "(?u)\\b\w+\\b"); 
+	xTransformer = TfidfVectorizer(min_df=0.0,stop_words=None,token_pattern ="(?u)\\b\w+\\b"); 
 
 	# vectorize \m/
-	X = xTransformer.fit_transform(filData['declaration'])#declarations)
+	# print filData['declaration']
+	X = xTransformer.fit_transform(filData['declaration'])
 	
 	# print xTransformer.get_feature_names();
 	
@@ -60,13 +65,21 @@ def generateY(filData):
 
 	# initiate transformer : binary count vectoriser
 	# stopword=> None to classify the None observations as negative examples
-	yTransformer = CountVectorizer(min_df = 0.0, binary=True, lowercase = False, stop_words=[u'None']);
+	yTransformer = CountVectorizer(min_df = 0.0, binary=True, lowercase = False)#, stop_words=[u'None']);
 
 	# vectorize \m/
 	Y = yTransformer.fit_transform(filData['answer']); 
+	# print Y
+
+	# tempY = Y.todense()
 	
-	# save topic labels to a reference dictionary
-	qbGbl.classDict = yTransformer.get_feature_names();
+	# for row in tempY:
+	# 	temp = []
+	# 	for topic in xrange(0,row.shape[1]-1):
+	# 		# if row[topic] != 0:
+	# 			print 
+	# # save topic labels to a reference dictionary
+	# qbGbl.classDict = yTransformer.get_feature_names();
 
 	return Y
 
@@ -75,6 +88,24 @@ def segmentData(X,Y,fraction):
 	XTrain, XTest, YTrain, YTest = cross_validation.train_test_split(X,Y,test_size=fraction,random_state=0)
 
 	return XTrain, XTest, YTrain, YTest
+
+## this function does the classification using a SVM classifier and gives generalization error
+def classify(XTrain,XTest,YTrain,YTest):
+	print XTrain.shape,XTest.shape,YTrain.shape,YTest.shape;
+	classifier = OneVsRestClassifier(SVC(kernel='linear'));
+
+	# print classifier
+	YTrain = YTrain.todense()
+	XTrain = XTrain.todense()
+
+	print type(YTrain)
+	print type(XTrain)
+
+	classifier.fit(XTrain, YTrain)
+
+
+
+
 
 ## this funciton generates the y vector for each class and produces a matrix with Ys
 # def generateY(filData):
