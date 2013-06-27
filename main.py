@@ -3,11 +3,15 @@
 
 import numpy;
 import pandas as pd;
+import pylab as P
+import scipy
 
 import qbPreprocess as qbPre
 import qbReliability as qbRel
 import qbGlobals as qbGbl
 import qbPrepare as qbPrepare
+
+import test
 
 ########################## Main functions ########################
 
@@ -47,7 +51,8 @@ def doReliabilityScoring():
 def generateNewData():
 	# run to generate the global full concordence set
 	notNeeded = doReliabilityScoring();
-	qbRel.generateSample(qbGbl.fullConFeedbacks,5000,'{0}{1}'.format(qbGbl.oriFileName,qbGbl.newSampFileName),40000)
+	qbRel.generateSample(qbGbl.fullConFeedbacks,3143,'{0}{1}'.format(qbGbl.oriFileName,qbGbl.newSampFileName),27000)
+
 
 def doObsComplexityScoring():
 	# load the filtered dataset
@@ -97,9 +102,116 @@ def classifyData(X,Y):
 
 	qbPrepare.classify(XTrain,XTest,YTrain,YTest);
 
+def analyse(filename):
+
+	# filData = qbPre.readDataFrame(filename,None,0);
+	# filData = filData[['WorkerId','Input.declaration','Answer.Q1']]
+
+	# new = filData
+
+	# filename = '{0}'.format(qbGbl.filFileName) 
+	# # filData = pd.DataFrame(columns=['index','worker','declaration','answer'])
+	# filData = qbPre.readDataFrame(filename,None,None);
+	# filData.columns = ['index','worker','declaration','answer'];
+
+	# del filData['index']
+
+	# old = filData
+
+	# oldDecs = []
+	
+	# for row in new['Input.declaration']:
+	# 	if (old[old['declaration'] == row].empty):
+	# 		continue;
+	# 	else:
+	# 		oldDecs.append(numpy.array(old[old['declaration'] == row])[1])
+
+	# oldDecs = pd.DataFrame(oldDecs,columns=['worker','declaration','answer'])
+	
+	# oldDecs.to_csv('{0}/PerfectDataset.csv'.format(qbGbl.oriFileName),index = False);
+	
+	## ===============================================================================
+	filData = qbPre.readDataFrame(filename,None,0);
+	filData = filData[['WorkerId','Input.declaration','Answer.Q1']]
+
+	new = filData
+
+	filename = '{0}/PerfectDataset.csv'.format(qbGbl.oriFileName)
+
+	old = qbPre.readDataFrame(filename,None,0)
+
+	# print new['Input.declaration'].nunique()
+	# print len(old['declaration'].unique())
+	filData = pd.Series(old['declaration'].unique())
+	# print len(filData)
+	# print '================='
+	accuracy = []
+	count=0;
+	for row in filData:
+		# print row
+		if not (new[new['Input.declaration'] == row].empty):
+			count += len(new[new['Input.declaration'] == row])
+			tempOld = qbPre.convClasses(list(old[old['declaration'] == row]['answer'])[0],'|')
+			# print tempOld
+			tempNew = qbPre.convClasses(list(new[new['Input.declaration'] == row]['Answer.Q1'])[0],'|')
+			# print tempNew
+			tempScore = 0.0;
+			for topic in tempNew:
+				if topic in tempOld:
+					tempScore += 1.0;
+
+			tempScore /= float(len(tempNew))
+			accuracy.append(tempScore)
+	
+	print scipy.stats.tmean(accuracy) 
+	# print count
+	P.figure();
+
+	n, bins, patches = P.hist(accuracy,len(set(accuracy)), histtype='bar',cumulative=False)
+
+	P.title("Score distribution")
+	P.xlabel("score")
+	P.ylabel("Frequency")
+	P.show()
 
 
+## this function takes an existing labelled dataset and a generated dataset and removed the labelled observations
+def cleanExistingData(filename1,filename2):
 
+	labelled = qbPre.readDataFrame(filename1,None,0)
+	labelled = labelled['Input.declaration']
+	print labelled
+	
+	unlabelled = qbPre.readDataFrame(filename2,None,0);
+
+	unlabelled = unlabelled.drop_duplicates(cols=['declaration'])
+
+	# print unlabelled[unlabelled['declaration']==labelled]
+	for row in labelled:
+		unlabelled = unlabelled.drop(unlabelled[unlabelled['declaration']==row].index)
+		# if not unlabelled[unlabelled['declaration']==row].empty:
+		# 	unlabelled.drop
+		# if not (unlabelled[unlabelled['Input.declaration'] == row].empty):
+	
+	print unlabelled
+
+	# unlabelled.to_csv('{0}/newData.csv'.format(qbGbl.oriFileName),index = False);
+
+
+	# # test = pd.DataFrame.to_records(labelled,index=False)
+	# count = 0
+	# # print test.pv_id
+	# for row in labelled.values:
+	# 	print '=================================='
+	# 	count += 1
+	# 	if len(unlabelled[unlabelled['pv_id']==row[0]]) > 1:
+	# 		# pass
+	# 		print unlabelled[unlabelled['pv_id']==row[0]]
+	# 	# print (len(unlabelled[unlabelled['pv_id'] == row[0] and unlabelled['global_user_id'] == row[1]])) #>1:
+	# 		# print 'IOOOO'
+		
+	# print count
+	# # write = 'data/write/cleanedDataset.csv';
 
 ########################## Main Script ########################
 
@@ -114,7 +226,7 @@ def classifyData(X,Y):
 # obsComplexity = doObsComplexityScoring();
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
-# generateNewData()
+generateNewData()
 
 # start tokenizing the stuff
 type = '100';
@@ -122,9 +234,14 @@ type = '100';
 
 # qbRel.goldenSet(100);
 
-## carry out word scoring and related statistics
-initData, dataX, dataY = preProcessData(type);
+# ## carry out word scoring and related statistics
+# initData, dataX, dataY = preProcessData(type);
 
-filData,X,Y = preProcessData(type);
+# filData,X,Y = preProcessData(type);
 
-classifyData(X,Y)
+# test.testingSVM()
+# classifyData(X,Y)
+
+# analyse('{0}/Batch_1189077_batch_results.csv'.format(qbGbl.oriFileName))
+
+# cleanExistingData('{0}/Batch_1189077_batch_results.csv'.format(qbGbl.oriFileName),'{0}/seededfeedback.clean.txt'.format(qbGbl.oriFileName))
