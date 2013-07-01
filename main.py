@@ -73,7 +73,10 @@ def prepareData(type):
 	filData = qbPre.prepareData(filData,type);
 	filData = pd.DataFrame(filData,columns=['index','declaration','answer'])
 	del filData['index']
-	# print filData
+	
+	noneRecs = filData[filData.declaration == ''].index
+	filData = filData.drop(noneRecs)
+
 	# generate csv file :D
 	filData.to_csv('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),index = False);
 	
@@ -226,21 +229,27 @@ def cleanExistingData(filename1,filename2):
 # obsComplexity = doObsComplexityScoring();
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
-generateNewData()
+# generateNewData()
 
 # start tokenizing the stuff
-type = '100';
+type = '111';
 # prepareData(type);
 
 # qbRel.goldenSet(100);
 
 # ## carry out word scoring and related statistics
 # initData, dataX, dataY = preProcessData(type);
+print '\n'
+print 'Classitying data using text preProcessing specification {0}'.format(type)
 
-# filData,X,Y = preProcessData(type);
+print '\n'
+filData,X,Y = preProcessData(type);
 
 # test.testingSVM()
-# classifyData(X,Y)
+classifyData(X,Y)
+
+print '\n\n\n'
+
 
 # analyse('{0}/Batch_1189077_batch_results.csv'.format(qbGbl.oriFileName))
 
