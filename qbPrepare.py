@@ -6,17 +6,20 @@
 
 from collections import Counter;
 from sklearn.feature_extraction.text import TfidfVectorizer;
-from sklearn.feature_extraction.text import CountVectorizer;
+from sklearn.preprocessing import LabelBinarizer
 
 from sklearn import cross_validation
+from sklearn import metrics
 
 from sklearn.multiclass import OneVsRestClassifier;
-from sklearn.svm import SVC
+from sklearn.svm import LinearSVC;
 
 
-import numpy; 
+import numpy as np;
+import time
 
 import qbGlobals as qbGbl;
+import qbPreprocess as qbPre;
 
 
 ## this function takes the feedback word vector and tramnforms it to a BOW vector according to dictionary to be 
@@ -25,13 +28,14 @@ def generateX(filData):
 
 	# initiate transformer : tf-idf vectoriser
 	# token pattern changed to define single char tokens as words.. (default : 2+ chars -> word)
-	xTransformer = TfidfVectorizer(min_df=0.0,stop_words=None,token_pattern ="(?u)\\b\w+\\b"); 
+	xTransformer = TfidfVectorizer(min_df=0.0,stop_words=None,token_pattern =u'(?u)\\b\\w+\\b');
 
 	# vectorize \m/
 	# print filData['declaration']
+
+
 	X = xTransformer.fit_transform(filData['declaration'])
-	
-	# print xTransformer.get_feature_names();
+	# print len(xTransformer.get_feature_names());
 	
 	# save the word feature references
 	qbGbl.wordRefDict = xTransformer.get_feature_names();
@@ -65,11 +69,22 @@ def generateY(filData):
 
 	# initiate transformer : binary count vectoriser
 	# stopword=> None to classify the None observations as negative examples
-	yTransformer = CountVectorizer(min_df = 0.0, binary=True, lowercase = False)#, stop_words=[u'None']);
+	# yTransformer = CountVectorizer(min_df = 0.0, binary=True, lowercase = False)#, stop_words=[u'None']);
 
 	# vectorize \m/
-	Y = yTransformer.fit_transform(filData['answer']); 
+	# Y = yTransformer.fit_transform(filData['answer']); 
 	# print Y
+
+	yTransformer = LabelBinarizer()
+
+	newY = [];
+	for answer in filData['answer']:
+		temp = qbPre.convClasses(answer,'|');
+		newY.append(temp);
+
+	Y = yTransformer.fit_transform(newY)
+
+	qbGbl.classDict = yTransformer.classes_;
 
 	# tempY = Y.todense()
 	
@@ -91,20 +106,24 @@ def segmentData(X,Y,fraction):
 
 ## this function does the classification using a SVM classifier and gives generalization error
 def classify(XTrain,XTest,YTrain,YTest):
-	print XTrain.shape,XTest.shape,YTrain.shape,YTest.shape;
-	classifier = OneVsRestClassifier(SVC(kernel='linear'));
+	# print XTrain.shape,XTest.shape,YTrain.shape,YTest.shape;
+	classifier = OneVsRestClassifier(LinearSVC());
 
 	# print classifier
-	YTrain = YTrain.todense()
-	XTrain = XTrain.todense()
+	# YTrain = YTrain.todense()
+	# XTrain = XTrain.todense()
 
-	print type(YTrain)
-	print type(XTrain)
-
+	# print type(XTrain)
+	# print type(YTrain)
+	start_time = time.time()
 	classifier.fit(XTrain, YTrain)
+	predicted = classifier.predict(XTest)
+
+	print 'Time taken to classify: {0} seconds'.format(time.time()-start_time);
 
 
-
+	##  precision
+	print 'accuracy score of the classifier: {0}'.format(metrics.accuracy_score(YTest,predicted))
 
 
 ## this funciton generates the y vector for each class and produces a matrix with Ys
