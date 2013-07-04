@@ -15,7 +15,6 @@ dataSetFileName = 'data/write/dataSet'
 att = 'data/attributes';
 
 # keeps the class references <class ref: ref index>
-# classDict = [];
 classDict = {};
 
 clsDictFileName = '{0}/classDict.csv'.format(att);
@@ -26,7 +25,6 @@ classUIRef = {};
 classUIRefFileName = '{0}/classUIRef.csv'.format(att);
 
 
-# wordRefDict = [];
 wordRefDict = {};
 
 wordRefDictFileName = '{0}/wordRefDict'.format(att);
