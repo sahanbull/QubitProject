@@ -15,7 +15,6 @@ from sklearn.pipeline import Pipeline
 from sklearn.multiclass import OneVsRestClassifier;
 from sklearn.svm import LinearSVC;
 
-
 import numpy as np;
 import time
 
@@ -121,6 +120,7 @@ def classify(XTrain,XTest,YTrain,YTest):
 	start_time = time.time()
 	# print XTrain.shape
 	classifier.fit(XTrain, YTrain)
+
 	predicted = classifier.predict(XTest)
 
 	print 'Time taken to classify: {0} seconds'.format(time.time()-start_time);
