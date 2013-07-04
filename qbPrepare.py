@@ -10,7 +10,7 @@ from sklearn.preprocessing import LabelBinarizer
 
 from sklearn import cross_validation
 from sklearn import metrics
-from sklearn.pipeline import Pipeline
+from sklearn.cross_validation import KFold
 
 from sklearn.multiclass import OneVsRestClassifier;
 from sklearn.svm import LinearSVC;
@@ -24,13 +24,11 @@ import qbPreprocess as qbPre;
 
 # initiate transformer : tf-idf vectoriser
 # token pattern changed to define single char tokens as words.. (default :m 2+ chars -> word)
-xTransformer = TfidfVectorizer(min_df=0.0,token_pattern =u'(?u)\\b\\w+\\b',ngram_range=(1,2));
+xTransformer = TfidfVectorizer(min_df=0.0,token_pattern =u'(?u)\\b\\w+\\b',ngram_range=(2,2));
 
 yTransformer = LabelBinarizer()
 
-classifier = OneVsRestClassifier(LinearSVC(penalty='L1',loss='L2',C=0.7, dual=False,multi_class='ovr',verbose=1));
-
-tfidfSVM = Pipeline([('clf',classifier)])
+classifier = OneVsRestClassifier(LinearSVC())#,verbose=1));
 
 
 ## this function takes the feedback word vector and tramnforms it to a BOW vector according to dictionary to be 
@@ -70,6 +68,11 @@ def generateX(filData):
 		
 # 	return X;	
 
+def kFoldGenerator(num,folds):
+	kf = KFold(num, n_folds=folds, indices=True)
+	
+	return kf
+
 def generateY(filData):
 
 	# initiate transformer : binary count vectoriser
@@ -107,7 +110,7 @@ def segmentData(X,Y,fraction):
 	return XTrain, XTest, YTrain, YTest
 
 ## this function does the classification using a SVM classifier and gives generalization error
-def classify(XTrain,XTest,YTrain,YTest):
+def classify(XTrain,XTest,YTrain,YTest,c,cv=False):
 	# print XTrain.shape,XTest.shape,YTrain.shape,YTest.shape;
 	
 
@@ -119,21 +122,30 @@ def classify(XTrain,XTest,YTrain,YTest):
 	# print type(YTrain)
 	start_time = time.time()
 	# print XTrain.shape
+
+	classifier = OneVsRestClassifier(LinearSVC(penalty='L1',loss='L2',C=c,dual=False,multi_class='ovr'))#,verbose=1));
+
 	classifier.fit(XTrain, YTrain)
 
 	predicted = classifier.predict(XTest)
 
-	print 'Time taken to classify: {0} seconds'.format(time.time()-start_time);
+	# if not a cross-validation instance, need to print results
+	if not cv:
 
-	# print report
-	print metrics.classification_report(YTest, predicted,target_names=yTransformer.classes_)
+		# print report
+		print metrics.classification_report(YTest, predicted,target_names=yTransformer.classes_)
 
-	# ##  Collective Statistics
-	print 'accuracy score of the classifier: {0}'.format(metrics.accuracy_score(YTest,predicted))
-	print 'accuracy score of the classifier: {0}'.format(1.0-metrics.hamming_loss(YTest,predicted))
-	print 'precision score of the classifier: {0}'.format(metrics.precision_score(YTest,predicted))
-	print 'recall score the classifier: {0}'.format(metrics.recall_score(YTest,predicted))
-	print 'F1 score of the classifier: {0}'.format(metrics.f1_score(YTest,predicted))
+		# ##  Collective Statistics
+		print 'accuracy score of the classifier: {0}'.format(1.0-metrics.hamming_loss(YTest,predicted))
+		print 'value of the C\t\t\t: {0}'.format(c)
+
+		print 'Time taken to classify\t\t: {0} seconds'.format(time.time()-start_time);
+
+		# print 'precision score of the classifier: {0}'.format(metrics.precision_score(YTest,predicted))
+		# print 'recall score the classifier: {0}'.format(metrics.recall_score(YTest,predicted))
+		# print 'F1 score of the classifier: {0}'.format(metrics.f1_score(YTest,predicted))
+
+	return float(1.0-metrics.hamming_loss(YTest,predicted))
 
 ## this funciton generates the y vector for each class and produces a matrix with Ys
 # def generateY(filData):
