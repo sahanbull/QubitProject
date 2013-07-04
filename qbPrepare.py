@@ -10,6 +10,7 @@ from sklearn.preprocessing import LabelBinarizer
 
 from sklearn import cross_validation
 from sklearn import metrics
+from sklearn.pipeline import Pipeline
 
 from sklearn.multiclass import OneVsRestClassifier;
 from sklearn.svm import LinearSVC;
@@ -22,13 +23,20 @@ import qbGlobals as qbGbl;
 import qbPreprocess as qbPre;
 
 
+# initiate transformer : tf-idf vectoriser
+# token pattern changed to define single char tokens as words.. (default :m 2+ chars -> word)
+xTransformer = TfidfVectorizer(min_df=0.0,token_pattern =u'(?u)\\b\\w+\\b',ngram_range=(1,2));
+
+yTransformer = LabelBinarizer()
+
+classifier = OneVsRestClassifier(LinearSVC(penalty='L1',loss='L2',C=0.7, dual=False,multi_class='ovr',verbose=1));
+
+tfidfSVM = Pipeline([('clf',classifier)])
+
+
 ## this function takes the feedback word vector and tramnforms it to a BOW vector according to dictionary to be 
 # compatible with the SVM classification
 def generateX(filData):
-
-	# initiate transformer : tf-idf vectoriser
-	# token pattern changed to define single char tokens as words.. (default : 2+ chars -> word)
-	xTransformer = TfidfVectorizer(min_df=0.0,stop_words=None,token_pattern =u'(?u)\\b\\w+\\b');
 
 	# vectorize \m/
 	# print filData['declaration']
@@ -37,8 +45,6 @@ def generateX(filData):
 	X = xTransformer.fit_transform(filData['declaration'])
 	# print len(xTransformer.get_feature_names());
 	
-	# save the word feature references
-	qbGbl.wordRefDict = xTransformer.get_feature_names();
 
 	return X
 
@@ -75,8 +81,6 @@ def generateY(filData):
 	# Y = yTransformer.fit_transform(filData['answer']); 
 	# print Y
 
-	yTransformer = LabelBinarizer()
-
 	newY = [];
 	for answer in filData['answer']:
 		temp = qbPre.convClasses(answer,'|');
@@ -94,7 +98,6 @@ def generateY(filData):
 	# 		# if row[topic] != 0:
 	# 			print 
 	# # save topic labels to a reference dictionary
-	# qbGbl.classDict = yTransformer.get_feature_names();
 
 	return Y
 
@@ -107,7 +110,7 @@ def segmentData(X,Y,fraction):
 ## this function does the classification using a SVM classifier and gives generalization error
 def classify(XTrain,XTest,YTrain,YTest):
 	# print XTrain.shape,XTest.shape,YTrain.shape,YTest.shape;
-	classifier = OneVsRestClassifier(LinearSVC());
+	
 
 	# print classifier
 	# YTrain = YTrain.todense()
@@ -116,15 +119,21 @@ def classify(XTrain,XTest,YTrain,YTest):
 	# print type(XTrain)
 	# print type(YTrain)
 	start_time = time.time()
+	# print XTrain.shape
 	classifier.fit(XTrain, YTrain)
 	predicted = classifier.predict(XTest)
 
 	print 'Time taken to classify: {0} seconds'.format(time.time()-start_time);
 
+	# print report
+	print metrics.classification_report(YTest, predicted,target_names=yTransformer.classes_)
 
-	##  precision
+	# ##  Collective Statistics
 	print 'accuracy score of the classifier: {0}'.format(metrics.accuracy_score(YTest,predicted))
-
+	print 'accuracy score of the classifier: {0}'.format(1.0-metrics.hamming_loss(YTest,predicted))
+	print 'precision score of the classifier: {0}'.format(metrics.precision_score(YTest,predicted))
+	print 'recall score the classifier: {0}'.format(metrics.recall_score(YTest,predicted))
+	print 'F1 score of the classifier: {0}'.format(metrics.f1_score(YTest,predicted))
 
 ## this funciton generates the y vector for each class and produces a matrix with Ys
 # def generateY(filData):
