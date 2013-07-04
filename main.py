@@ -6,6 +6,8 @@ import pandas as pd;
 import pylab as P
 import scipy
 import re
+import sklearn.cross_validation as cv
+import sklearn
 
 import random
 
@@ -97,9 +99,14 @@ def preProcessData(type):
 	sample = filData[filData['answer'].str.contains('None')] # pick all the observaions as None of above
 	filData = filData.drop(sample.index) # drop them as well
 
+	rows = list(filData.index);
+	random.shuffle(rows);
+	# print rows
+	filData = filData.ix[rows]
+
+	# print oldSample.declaration
 	# filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
 	# print filData
-
 
 	# m = int(round(len(filData)*1.0))
 	# print m
@@ -259,6 +266,11 @@ print '\n'
 print 'Classitying data using text preProcessing specification {0}'.format(type)
 print '\n'
 filData,X,Y = preProcessData(type);
+
+# print Y
+# scores = cv.cross_val_score(qbPrepare.classifier,X,Y,cv=5,scoring='accuracy')
+
+# print scores
 
 # test.testingSVM()
 classifyData(X,Y)
