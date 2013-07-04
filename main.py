@@ -5,6 +5,9 @@ import numpy;
 import pandas as pd;
 import pylab as P
 import scipy
+import re
+
+import random
 
 import qbPreprocess as qbPre
 import qbReliability as qbRel
@@ -90,8 +93,21 @@ def preProcessData(type):
 	# filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
 
 	filData = qbPre.readDataFrame('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),None,0);
+	filData = filData.drop_duplicates(cols=['declaration']) # drop all the duplicates
+	sample = filData[filData['answer'].str.contains('None')] # pick all the observaions as None of above
+	filData = filData.drop(sample.index) # drop them as well
 
 	# filData = qbPre.readFile('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),type);
+	# print filData
+
+
+	# m = int(round(len(filData)*1.0))
+	# print m
+	# rows = random.sample(filData.index,m)
+	
+	# # random sample generated for old set
+	# filData = filData.ix[rows]
+	# print 'Number of observations: {0}'.format(len(filData))
 
 	X = qbPrepare.generateX(filData);
 
@@ -241,15 +257,12 @@ type = '111';
 # initData, dataX, dataY = preProcessData(type);
 print '\n'
 print 'Classitying data using text preProcessing specification {0}'.format(type)
-
 print '\n'
 filData,X,Y = preProcessData(type);
 
 # test.testingSVM()
 classifyData(X,Y)
-
-print '\n\n\n'
-
+print '\n'
 
 # analyse('{0}/Batch_1189077_batch_results.csv'.format(qbGbl.oriFileName))
 
