@@ -123,10 +123,37 @@ def preProcessData(type):
 	return [filData,X,Y] 
 
 ## this function takes X and Y and does everything necessary to classify them
-def classifyData(X,Y):
+def classifyData(X,Y,C=[1.0]):
 	XTrain, XTest, YTrain, YTest = qbPrepare.segmentData(X,Y,0.4);
 
-	qbPrepare.classify(XTrain,XTest,YTrain,YTest);
+	kfolds = qbPrepare.kFoldGenerator(XTrain.shape[0],5)
+
+	valScore = [];
+
+	for c in C:
+
+		score = [];
+
+		for train,test in kfolds:
+			xTrainCV = XTrain[train]
+			yTrainCV = YTrain[train]
+			
+			xTestCV = XTrain[test]
+			yTestCV = YTrain[test]
+
+			# print xTrainCV.shape,yTrainCV.shape,xTestCV.shape,yTestCV.shape
+
+			score.append(qbPrepare.classify(XTrain,XTest,YTrain,YTest,c,cv=True))
+
+		print 'cross validation accuracy with C= {0}: {1}'.format(c,numpy.mean(score))	
+	
+		valScore.append(numpy.mean(score))
+	
+	print '\n'
+
+	finalC = C[numpy.argmax(valScore)]
+
+	qbPrepare.classify(XTrain,XTest,YTrain,YTest,finalC);
 
 def analyse(filename):
 
@@ -190,7 +217,7 @@ def analyse(filename):
 			accuracy.append(tempScore)
 	
 	print scipy.stats.tmean(accuracy) 
-	# print count
+
 	P.figure();
 
 	n, bins, patches = P.hist(accuracy,len(set(accuracy)), histtype='bar',cumulative=False)
@@ -253,28 +280,27 @@ def cleanExistingData(filename1,filename2):
 # qbRel.writeScorecard(qbGbl.scoreFileName,scoreCard);
 
 # generateNewData()
-
+types = ['100','110','111']
 # start tokenizing the stuff
-type = '111';
-# prepareData(type);
+for t in types:
+	type = t;
+	# prepareData(type);
 
-# qbRel.goldenSet(100);
+	# qbRel.goldenSet(100);
 
-# ## carry out word scoring and related statistics
-# initData, dataX, dataY = preProcessData(type);
-print '\n'
-print 'Classitying data using text preProcessing specification {0}'.format(type)
-print '\n'
-filData,X,Y = preProcessData(type);
+	# ## carry out word scoring and related statistics
+	# initData, dataX, dataY = preProcessData(type);
+	print '\n'
+	print 'Classitying data using text preProcessing specification {0}'.format(type)
+	print '\n'
+	filData,X,Y = preProcessData(type);
 
-# print Y
-# scores = cv.cross_val_score(qbPrepare.classifier,X,Y,cv=5,scoring='accuracy')
+	# print Y
+	# scores = cv.cross_val_score(qbPrepare.classifier,X,Y,cv=10,scoring='precision')
 
-# print scores
-
-# test.testingSVM()
-classifyData(X,Y)
-print '\n'
+	# test.testingSVM()
+	classifyData(X,Y,C=[0.1,0.5,0.7,1.0,1.2,2.0])
+	print '\n'
 
 # analyse('{0}/Batch_1189077_batch_results.csv'.format(qbGbl.oriFileName))
 
