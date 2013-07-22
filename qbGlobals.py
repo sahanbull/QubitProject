@@ -1,9 +1,13 @@
 
+import numpy as np
+
 ################### global variables #######################
 
 oriFileName = 'data/read';
 
 filFileName = 'data/write/fil_comb_results.csv';
+
+finalReaderFile = 'data/write/finalReaderFile.csv';
 
 newSampFileName = '/seededfeedback.clean.txt';
 
@@ -47,6 +51,10 @@ topicHist = {}; # to store the topic ditribution
 
 workTopics = {}; # to store the topic distribution per worker
 
+workDict = {}
+
 ## full concordence topics
 
 fullConFeedbacks = [];
+
+weights = np.ndarray([]);
