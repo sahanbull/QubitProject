@@ -4,6 +4,7 @@
 import numpy;
 import scipy
 import re
+import gensim
 import sklearn.cross_validation as cv
 import pandas as pd
 import pylab as P
@@ -400,8 +401,8 @@ def cleanExistingData(filename1,filename2):
 
 def filterNoneObs(type):
 	filData = qbPre.readDataFrame('{0}_{1}.csv'.format(qbGbl.dataSetFileName,type),None,0);
-	print filData
-
+	noneData = filData[filData.answer=='None']
+	noneData.to_csv('{0}_{1}.csv'.format(qbGbl.noneSetFileName,type),index = False);
 
 
 ########################## Main Script ########################
@@ -478,5 +479,21 @@ def filterNoneObs(type):
 types = ['100']
 
 for type in types:
-	filterNoneObs(type);
+	# write only the none obs to different files
+	# filterNoneObs(type);
+
+	# read the file
+	filData = qbPre.readDataFrame('{0}_{1}.csv'.format(qbGbl.noneSetFileName,type),None,0);
+
+	X = qbPrepare.generateX(filData)
+	corp = gensim.matutils.Sparse2Corpus(X,documents_columns=False)
+
+	# print qbGbl.wordRefDict
+
+	lda = gensim.models.ldamodel.LdaModel(corpus=corp, id2word=qbGbl.wordRefDict, num_topics=10, update_every=1, chunksize=10000, passes=1)
+	print lda[doc_bow]
+	lda.print_topics(10)
+	# qbPrepare.genTopics(corpus)
 	
+
+
