@@ -13,6 +13,62 @@ import pandas as pd
 
 import qbGlobals as qbGbl
 
+####################### new versions using pandas extensively :D ###################
+
+def readFiles(paths):
+	# print paths
+	df = pd.DataFrame()
+	for file in paths:
+		if df.empty:
+			df = readDataFrame(file,None,0)
+		else:
+			df = df.append(readDataFrame(file,None,0))
+
+	return df
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ######################## Preprocess data #########################
 
 ## this function reads a simple file
@@ -32,10 +88,11 @@ def readSimpleFile(file):
 
 ## this function returns all the file paths with .csv extension in the directory
 def listFiles(path):
-	path = '{0}/*.csv'.format(path);
+	path = '{0}/Batch_*_batch_results.csv'.format(path);
 
 	# print path
 	paths = glob.glob(path)
+	# print paths
 	return paths
 
 ## this function filters and returns the specified fields only
