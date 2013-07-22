@@ -24,7 +24,7 @@ import qbPreprocess as qbPre;
 
 # initiate transformer : tf-idf vectoriser
 # token pattern changed to define single char tokens as words.. (default :m 2+ chars -> word)
-xTransformer = TfidfVectorizer(min_df=0.0,token_pattern =u'(?u)\\b\\w+\\b',ngram_range=(2,2));
+xTransformer = TfidfVectorizer(min_df=0.0,token_pattern =u'(?u)\\b\\w+\\b',ngram_range=(1,1));
 
 yTransformer = LabelBinarizer()
 
@@ -38,9 +38,15 @@ def generateX(filData):
 
 
 	X = xTransformer.fit_transform(filData['declaration'])
-	# print len(xTransformer.get_feature_names());
 	
+	qbGbl.wordRefDict = {}
 
+	count = 0;
+	for word in xTransformer.get_feature_names():
+		qbGbl.wordRefDict[count]=word;
+		count += 1;	
+	# print qbGbl.wordRefDict
+	
 	return X
 
 # 	obs = len(filData);
@@ -165,3 +171,7 @@ def classify(XTrain,XTest,YTrain,YTest,c,cv=False):
 # 				Y[int(row[0]),entry] = 1;
 	
 # 	return Y
+
+
+def genTopics(corpus):
+	lda = gensim.models.ldamodel.LdaModel(corpus=corpus, num_topics=10, update_every=1, chunksize=10000, passes=1)
