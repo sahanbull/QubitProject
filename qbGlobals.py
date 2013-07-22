@@ -14,6 +14,10 @@ newSampFileName = '/seededfeedback.clean.txt';
 # record simple only dataset
 dataSetFileName = 'data/write/dataSet'
 
+# record the None of the above observations dataset
+noneSetFileName = 'data/write/noneDataSet'
+
+
 
 # to store required attributes
 att = 'data/attributes';
