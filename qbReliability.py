@@ -9,6 +9,7 @@ import scipy.stats
 import matplotlib as mpl
 import random
 import pandas as pd
+import time
 
 import qbGlobals as qbGbl
 import qbPreprocess as qbPre
@@ -345,4 +346,173 @@ def generateSample(fulConSet,m,newFileName,n):
 	print sample.declaration
 	# generate csv file :D
 	sample.to_csv('data/write/newFeedbackSample2.csv',index = False);
+
+
+def analyseWorkers():
+	filData = qbPre.readDataFrame(qbGbl.filFileName,None,0);
+
+	workers = filData.WorkerId.drop_duplicates();
+
+	filename = '{0}/PerfectDataset.csv'.format(qbGbl.oriFileName)
+
+	old = qbPre.readDataFrame(filename,None,0)
+
+	perfectDecs = old.declaration.drop_duplicates()
+
+	dataSet = pd.DataFrame()
+
+	for row in perfectDecs:
+		if not filData[filData['Input.declaration']==row].empty:
+			if dataSet.empty:
+				dataSet = filData[filData['Input.declaration']==row]
+			else:
+				dataSet = dataSet.append(filData[filData['Input.declaration']==row])
+
+
+	dataSet.SubmitTime = pd.to_datetime(dataSet.SubmitTime)
+
+	# dataSet = pd.DataFrame(dataSet.values,
+	# 	columns=['SubmitTime','WorkerId','Input.declaration','Answer.Q1'])
+
+	# print dataSet
+
+	dataSet = dataSet.sort(columns=['SubmitTime'])
+	# firstDate = list(dataSet.SubmitTime)[0]
+
+	records = [];
+	# print dataSet	
+	workers = dataSet.WorkerId.drop_duplicates();
 	
+
+
+	for worker in workers:
+		tempStats = {'score':0.0,'freq':0}
+		tempRecords = dataSet[dataSet.WorkerId==worker]
+		for row in tempRecords.itertuples():
+			newRow = list(row)
+			# print newRow[-2]
+		 	# print old[old['declaration'] == newRow[-2]]
+			tempOld = qbPre.convClasses(list(old[old['declaration'] == newRow[-2]].answer)[0],'|')
+			# print tempOld
+			tempNew = qbPre.convClasses(newRow[-1],'|')
+			# print tempNew
+			tempScore = 0.0;
+			for topic in tempNew:
+				if topic in tempOld:
+					tempScore += 1.0;
+			tempScore /= float(len(tempNew))
+
+		 	tempStats['freq']+=1; # frequency ++
+			tempStats['score']+=tempScore;
+			
+			aggrScore = tempStats['score']/tempStats['freq']
+			tm = row[1].time()
+			tm = float(tm.hour) + float(tm.minute) / 60
+			# print tm
+
+			compl = float(tempStats['freq'])/float(len(tempRecords))
+			# del newRow[0]
+			newRow.extend([tm,tempScore,aggrScore,compl])
+
+			records.append(newRow)
+
+	records = numpy.array(records);
+
+	dataSet = pd.DataFrame(records[:,1:],
+		columns = ['SubmitTime','WorkerId','Input.declaration','Answer.Q1','Time','TempScore','AggrScore','Completion'],
+		index=records[:,0])
+
+	return dataSet
+
+
+
+	# newDataSet = pd.DataFrame(records[1:],columns=[])
+	
+		# print tempStats
+
+
+
+	# counter = 0
+	# for worker in workers:
+	# 	if len(filData[filData.WorkerId==worker])<100:
+	# 		counter += len(filData[filData.WorkerId==worker])
+
+	# print counter
+	# print filData
+
+def pickBadEntries(frame,val=0.75):
+	workStat = frame[frame.Completion==1.0]
+
+	goodList = workStat[workStat.AggrScore > val][['WorkerId','AggrScore']]
+
+	for worker in goodList.values:
+		qbGbl.workDict[worker[0]] = worker[1]
+
+	badList = workStat[workStat.AggrScore <= val].WorkerId
+	badEntries = pd.DataFrame()
+	for worker in badList:
+		tempBad = frame[frame.WorkerId==worker]
+		badEntries = badEntries.append(tempBad)
+
+	# remove the duplicates depending on the majority vote
+
+	temp = pickBadObs(frame)
+	
+	badEntries = badEntries.append(temp)
+		
+	return badEntries
+	# print len(uniqueSet)
+	# return badEntries
+
+
+
+
+
+
+
+
+
+
+def pickBadObs(frame):
+
+	fulBads = pd.DataFrame()
+	# pick unique declarations
+	uniqueSet = frame['Input.declaration'].drop_duplicates()
+
+	# foreach declaration...
+	for dec in uniqueSet:
+		# all the openions for that openion
+		temp = frame[frame['Input.declaration']==dec]
+
+		# pick all the classes with frequency
+		classes = list(temp['Answer.Q1'])
+		norm = float(len(classes)) # total number of openions
+
+		# count the class frequency among worker responses for the feedback
+		classes = dict(Counter(classes));
+
+		# foreach dictionary entry, 
+		for obs in classes:
+			# normalize for number of openions (makes it a fraction)
+			classes[obs] = float(classes[obs])/norm;
+
+		# foreach observation,
+		tempScore = []
+		for obs in temp.values:
+			if obs[1] not in qbGbl.workDict:
+				qbGbl.workDict[obs[1]] = 0.0;
+			score = qbGbl.workDict[obs[1]] * classes[obs[3]]
+			# print score
+			tempScore.append(score)
+
+		tempTemp = pd.Series(tempScore,index=temp.index)
+		
+		# remove the top scored observation as we need to leave it
+		temp = temp.drop(tempTemp.idxmax())
+
+		fulBads = fulBads.append(temp)
+
+	return fulBads
+
+
+
