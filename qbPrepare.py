@@ -28,8 +28,6 @@ xTransformer = TfidfVectorizer(min_df=0.0,token_pattern =u'(?u)\\b\\w+\\b',ngram
 
 yTransformer = LabelBinarizer()
 
-classifier = OneVsRestClassifier(LinearSVC())#,verbose=1));
-
 
 ## this function takes the feedback word vector and tramnforms it to a BOW vector according to dictionary to be 
 # compatible with the SVM classification
@@ -129,8 +127,10 @@ def classify(XTrain,XTest,YTrain,YTest,c,cv=False):
 
 	predicted = classifier.predict(XTest)
 
+	
 	# if not a cross-validation instance, need to print results
 	if not cv:
+		qbGbl.weights = classifier.coef_
 
 		# print report
 		print metrics.classification_report(YTest, predicted,target_names=yTransformer.classes_)
