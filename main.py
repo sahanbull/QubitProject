@@ -488,10 +488,9 @@ for type in types:
 	X = qbPrepare.generateX(filData)
 	corp = gensim.matutils.Sparse2Corpus(X,documents_columns=False)
 
-	# print qbGbl.wordRefDict
-
+	print qbGbl.wordRefDict
+	
 	lda = gensim.models.ldamodel.LdaModel(corpus=corp, id2word=qbGbl.wordRefDict, num_topics=10, update_every=1, chunksize=10000, passes=1)
-	print lda[doc_bow]
 	lda.print_topics(10)
 	# qbPrepare.genTopics(corpus)
 	
