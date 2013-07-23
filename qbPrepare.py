@@ -43,10 +43,10 @@ def generateX(filData):
 
 	count = 0;
 	for word in xTransformer.get_feature_names():
-		qbGbl.wordRefDict[word]=count;
+		qbGbl.wordRefDict[count]=word;
 		count += 1;	
 	# print qbGbl.wordRefDict
-
+	
 	return X
 
 # 	obs = len(filData);
