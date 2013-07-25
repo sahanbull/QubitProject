@@ -1,4 +1,8 @@
 
+Unigram only
+
+Classitying data using text preProcessing specification 111
+
 cross validation accuracy with C= 0.7:               0.942911282011
 
 
@@ -23,7 +27,9 @@ Time taken to classify		: 2.45556497574 seconds
 
 ===========================
 
-Classitying data using text preProcessing specification 111 **********************
+Unigram + bigram  
+
+Classitying data using text preProcessing specification 111 
 
 cross validation accuracy with C= 0.7:                0.942372155712
 
