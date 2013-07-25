@@ -24,7 +24,7 @@ import qbPreprocess as qbPre;
 
 # initiate transformer : tf-idf vectoriser
 # token pattern changed to define single char tokens as words.. (default :m 2+ chars -> word)
-xTransformer = TfidfVectorizer(min_df=0.0,token_pattern =u'(?u)\\b\\w+\\b',ngram_range=(1,1));
+xTransformer = TfidfVectorizer(min_df=0.0,token_pattern =u'(?u)\\b\\w+\\b',ngram_range=(1,1), stop_words='english');
 
 yTransformer = LabelBinarizer()
 
