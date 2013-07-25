@@ -302,6 +302,7 @@ def analyse(filename):
 	
 	## ===============================================================================
 	filData = qbPre.readDataFrame(filename,None,0);
+	# filData = filData[['WorkerId','Input.declaration','Answer.Q1']]
 	filData = filData[['WorkerId','Input.declaration','Answer.Q1']]
 
 	new = filData
@@ -440,8 +441,12 @@ def filterNoneObs(type):
 # 	# test.testingSVM()
 # 	classifyData(X,Y,C=[0.1,0.5,0.7,1.0,1.2,2.0])
 # 	print '\n'
+
+################################ Analyse the dataset for reliability ############################################
 	
-# analyse('{0}/Batch_1191444_batch_results.csv'.format(qbGbl.oriFileName))
+analyse('{0}/Batch_1191444_batch_results.csv'.format(qbGbl.oriFileName))
+
+
 
 # cleanExistingData('{0}/Batch_1189077_batch_results.csv'.format(qbGbl.oriFileName),'{0}/seededfeedback.clean.txt'.format(qbGbl.oriFileName))
 
@@ -476,26 +481,36 @@ def filterNoneObs(type):
 ########################## New topic detection in the observations ###########################################
 
 # types = ['100','110','111']
-types = ['100']
+# types = ['100']
 
-for type in types:
-	# write only the none obs to different files
-	# filterNoneObs(type);
+# for type in types:
+# 	# write only the none obs to different files
+# 	# filterNoneObs(type);
+# 	print type
+# 	# read the file
+# 	filData = qbPre.readDataFrame('{0}_{1}.csv'.format(qbGbl.noneSetFileName,type),None,0);
 
-	# read the file
-	filData = qbPre.readDataFrame('{0}_{1}.csv'.format(qbGbl.noneSetFileName,type),None,0);
+# 	X = qbPrepare.generateX(filData)
+# 	corpus = gensim.matutils.Sparse2Corpus(X,documents_columns=False)
+# 	gensim.corpora.MmCorpus.serialize('/tmp/corpus.mm', corpus)
 
-	X = qbPrepare.generateX(filData)
-	corp = gensim.matutils.Sparse2Corpus(X,documents_columns=False)
-	print len(corp)
-	# for p in corp:
-		# print p
+# 	mm = gensim.corpora.MmCorpus('/tmp/corpus.mm')
 
-	# print qbGbl.wordRefDict
+	
+	
 
-	# lda = gensim.models.ldamodel.LdaModel(corpus=corp, id2word=qbGbl.wordRefDict, num_topics=10, update_every=1, chunksize=10000, passes=1)
-	# lda.print_topics(10)
-	# qbPrepare.genTopics(corpus)
+# 	# for p in corp:
+# 		# print p
+
+# 	# print qbGbl.wordRefDict
+
+# 	lda = gensim.models.ldamodel.LdaModel(mm,10,id2word=qbGbl.wordRefDict, update_every=1, chunksize=10000, passes=1, alpha=0.001,eta=0.00000001)
+# 	# lda.update(mm)
+# 	temp = lda.print_topics(10)
+# 	print len(temp)
+# 	for t in temp:
+# 		print t
+# 	# qbPrepare.genTopics(corpus)
 	
 
 
